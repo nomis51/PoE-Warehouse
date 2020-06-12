@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="PoEW.Application.Controls.StashTabControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PoEW.Application.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="424" d:DesignWidth="424">
+    <Grid x:Name="grdTab">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+
+        <local:NomalStashTabGridControl Margin="1" x:Name="normalStashGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></local:NomalStashTabGridControl>
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,43 @@
+﻿<mah:MetroWindow x:Class="PoEW.Application.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:local="clr-namespace:PoEW.Application.Views"
+        xmlns:controls="clr-namespace:PoEW.Application.Controls"
+        mc:Ignorable="d"
+        Title="Login"
+        WindowStartupLocation="CenterScreen"
+                 Width="610"
+                 Height="200">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="10"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0" Name="tabcLoginOptions" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectionChanged="tabcLoginOptions_SelectionChanged">
+            <TabItem Header="POESESSID Login">
+                <Grid>
+                    <controls:PoESessionLoginControl x:Name="loginDialogPOESESSID" />
+                </Grid>
+            </TabItem>
+            <TabItem Name="tabPoEWebsiteLogin" Header="PoE Website Login" MouseUp="tabPoEWebsiteLogin_MouseUp">
+                <Grid>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Steam Login">
+                <Grid>
+                    <controls:SteamLoginControl x:Name="loginDialogSteam"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <Button Name="btnLogin"  Content="Login" Click="btnLogin_Click" HorizontalAlignment="Right" MinWidth="80" Grid.Row="2" VerticalAlignment="Top"/>
+    </Grid>
+</mah:MetroWindow>

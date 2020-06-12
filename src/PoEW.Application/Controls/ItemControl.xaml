@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="PoEW.Application.Controls.ItemControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PoEW.Application.Controls"
+             mc:Ignorable="d" >
+    <Grid Name="grd">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Popup Name="popItemTooltip" Placement="Right" HorizontalOffset="5">
+            <local:ItemTooltipControl x:Name="itemTooltipControl"></local:ItemTooltipControl>
+        </Popup>    
+
+        <Image x:Name="imgIconUrl" Grid.Row="0" Grid.RowSpan="99" Grid.Column="0" Grid.ColumnSpan="99" Stretch="Fill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseEnter="imgIconUrl_MouseEnter" MouseLeave="imgIconUrl_MouseLeave" MouseRightButtonUp="imgIconUrl_MouseRightButtonUp"></Image>
+        <TextBlock Name="txtbStackSize" Visibility="Hidden" Foreground="White" Text="10" FontWeight="Bold" FontSize="10" Grid.Row="0" Grid.Column="0" Margin="3 1 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"></TextBlock>
+        <DockPanel  Panel.ZIndex="9999" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="0" Grid.Column="0" Grid.RowSpan="99" Grid.ColumnSpan="99">
+            <TextBlock Name="txtbPriceAmount" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="0" Grid.Column="0" Grid.RowSpan="99" Grid.ColumnSpan="99"></TextBlock>
+            <Image Name="imgPriceCurrency" Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Bottom"></Image>
+        </DockPanel>
+    </Grid>
+</UserControl>

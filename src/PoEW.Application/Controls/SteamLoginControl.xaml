@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="PoEW.Application.Controls.SteamLoginControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PoEW.Application.Controls"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             mc:Ignorable="d" 
+             d:DesignWidth="800" Height="96.667">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <!--<TextBox Name="txtUsername" Height="23" Grid.Row="0"  TextWrapping="Wrap" Text="" mah:TextBoxHelper.Watermark="Username" HorizontalAlignment="Stretch"  VerticalAlignment="Top"/>
+        <TextBox Name="txtPassword" Height="23" Grid.Row="1"  TextWrapping="Wrap" Text="" mah:TextBoxHelper.Watermark="Password" HorizontalAlignment="Stretch"  VerticalAlignment="Top"/>
+        <Button Name="btnLogin"  Content="Login" Click="btnLogin_Click" HorizontalAlignment="Stretch" Grid.Row="2" VerticalAlignment="Top"/>-->
+
+        <Label Content="Not available yet" Grid.Row="0" Grid.RowSpan="3" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+
+    </Grid>
+</UserControl>

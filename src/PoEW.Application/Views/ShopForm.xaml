@@ -1,0 +1,30 @@
+﻿<mah:MetroWindow x:Class="PoEW.Application.Views.ShopForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PoEW.Application.Views"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="ToolWindow"
+        Title="Shop informations" Height="300" Width="500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="10"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions></Grid.ColumnDefinitions>
+
+        <TextBox Name="txtThreadId" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0" Grid.Column="0" mah:TextBoxHelper.Watermark="Thread ID or Thread URL"></TextBox>
+        <Label Name="lblHowToFindThreadID" HorizontalAlignment="Left" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0"  Foreground="DeepSkyBlue" Cursor="Hand">
+            <TextBlock TextDecorations="Underline">How to find my Thread ID or Thread URL?</TextBlock>
+        </Label>
+        <ComboBox Name="cboLeagues" SelectedIndex="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2" Grid.Column="0" mah:TextBoxHelper.Watermark="Leagues"></ComboBox>
+        <Button x:Name="btnSetShop" HorizontalAlignment="Right" MinWidth="80" VerticalAlignment="Stretch" Click="btnSetShop_Click" Content="Save" Grid.Row="4" Grid.Column="0"></Button>
+    </Grid>
+</mah:MetroWindow>

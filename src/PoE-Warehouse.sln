@@ -3,18 +3,34 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoEW.GUI", "PoEW.GUI.csproj", "{A95B7303-DDCC-4055-8D0E-B51816AB964E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoEW.API", "PoEW.API\PoEW.API.csproj", "{901DC77E-F124-4615-A9A3-31ADCACBB792}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoEW.Application", "PoEW.Application\PoEW.Application.csproj", "{0283930F-2DFE-4896-81C6-A42BC257AFDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A95B7303-DDCC-4055-8D0E-B51816AB964E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A95B7303-DDCC-4055-8D0E-B51816AB964E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A95B7303-DDCC-4055-8D0E-B51816AB964E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A95B7303-DDCC-4055-8D0E-B51816AB964E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{901DC77E-F124-4615-A9A3-31ADCACBB792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{901DC77E-F124-4615-A9A3-31ADCACBB792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{901DC77E-F124-4615-A9A3-31ADCACBB792}.Debug|x64.ActiveCfg = Debug|x64
+		{901DC77E-F124-4615-A9A3-31ADCACBB792}.Debug|x64.Build.0 = Debug|x64
+		{901DC77E-F124-4615-A9A3-31ADCACBB792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{901DC77E-F124-4615-A9A3-31ADCACBB792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{901DC77E-F124-4615-A9A3-31ADCACBB792}.Release|x64.ActiveCfg = Release|x64
+		{901DC77E-F124-4615-A9A3-31ADCACBB792}.Release|x64.Build.0 = Release|x64
+		{0283930F-2DFE-4896-81C6-A42BC257AFDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0283930F-2DFE-4896-81C6-A42BC257AFDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0283930F-2DFE-4896-81C6-A42BC257AFDE}.Debug|x64.ActiveCfg = Debug|x64
+		{0283930F-2DFE-4896-81C6-A42BC257AFDE}.Debug|x64.Build.0 = Debug|x64
+		{0283930F-2DFE-4896-81C6-A42BC257AFDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0283930F-2DFE-4896-81C6-A42BC257AFDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0283930F-2DFE-4896-81C6-A42BC257AFDE}.Release|x64.ActiveCfg = Release|x64
+		{0283930F-2DFE-4896-81C6-A42BC257AFDE}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,7 +7,7 @@ It's a multi-functionality trade manager. Greatly inspired by the Acquisition pr
 
 # Features
 ## Core Features
-- Virtal Stash
+- Virtual Stash
 - Auto-Online 
 
 ## Additional Features

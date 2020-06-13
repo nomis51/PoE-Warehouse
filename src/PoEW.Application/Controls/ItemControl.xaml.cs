@@ -27,6 +27,9 @@ namespace PoEW.Application.Controls {
         Item Item;
         Price Price;
 
+        SolidColorBrush DarkBlue = (SolidColorBrush)(new BrushConverter().ConvertFrom("#0e0f2f"));
+        SolidColorBrush DarkRed = (SolidColorBrush)(new BrushConverter().ConvertFrom("#2a0403"));
+
         PricingForm PricingFormWin;
         List<Image> SocketsImage = new List<Image>();
 
@@ -42,6 +45,11 @@ namespace PoEW.Application.Controls {
             SetImage(Item.IconUrl);
             SetStackSize();
             SetSockets();
+            SetItemBackground();
+        }
+
+        private void SetItemBackground() {
+            rectBackground.Fill = Item.Identified ? DarkBlue : DarkRed;
         }
 
         private Brush GetFrameColor() {

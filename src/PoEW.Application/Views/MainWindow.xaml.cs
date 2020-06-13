@@ -53,9 +53,6 @@ namespace PoEW.Application {
 
             stashTabSelectorControl.OnStashTabSelected += StashTabSelectorControl_OnStashTabSelected;
 
-            PricingForm.OnPriceAdded += PricingForm_OnPriceAdded;
-            PricingForm.OnPriceRemoved += PricingForm_OnPriceRemoved;
-
             Session.OnLocalStashTabsUpdated += Session_OnLocalStashTabsUpdated;
 
             var lastPlayer = Session.Instance().GetLastPlayer().Result;
@@ -113,14 +110,6 @@ namespace PoEW.Application {
             }
 
             stashTabControl.SetStashTab(stashTabs.Values.ElementAt(Session.Instance().GetSelectedTabIndex()), Session.Instance().GetShop().GetPrices());
-        }
-
-        private void PricingForm_OnPriceRemoved(string itemId) {
-            Session.Instance().GetShop().UnsetPrice(itemId);
-        }
-
-        private void PricingForm_OnPriceAdded(Price price, string itemId) {
-            Session.Instance().GetShop().SetPrice(itemId, price);
         }
 
         private void StashTabSelectorControl_OnStashTabSelected(int index) {

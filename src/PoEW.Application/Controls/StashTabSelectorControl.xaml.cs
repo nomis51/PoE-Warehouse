@@ -64,38 +64,54 @@ namespace PoEW.Application.Controls {
             });
         }
 
+        private Image GenerateTabImage(int index, string name) {
+            Image imgTab = new Image();
+            imgTab.SetValue(Grid.ColumnProperty, Tabs.Count);
+            imgTab.Source = bmpTab;
+            imgTab.HorizontalAlignment = HorizontalAlignment.Stretch;
+            imgTab.VerticalAlignment = VerticalAlignment.Stretch;
+            imgTab.MouseDown += tab_MouseDown;
+            imgTab.Name = $"img{index}{name}";
+
+            return imgTab;
+        }
+
+        private Label GenerateTabLabel(int index, string name) {
+            Label lblTab = new Label();
+            lblTab.Foreground = System.Windows.Media.Brushes.DarkGoldenrod;
+            lblTab.SetValue(Grid.ColumnProperty, Tabs.Count);
+            lblTab.HorizontalAlignment = HorizontalAlignment.Center;
+            lblTab.VerticalAlignment = VerticalAlignment.Center;
+            lblTab.Content = name.Substring(0, name.Length > 6 ? 6 : name.Length) + (name.Length > 6 ? "..." : "");
+            lblTab.MouseDown += tab_MouseDown;
+            lblTab.Name = $"lbl{index}{name}";
+
+            return lblTab;
+        }
+
         public void AddTab(int index, string name) {
             this.Dispatcher.Invoke(() => {
                 Tabs.Add(name, index);
 
-                Image imgTab = new Image();
-                imgTab.SetValue(Grid.ColumnProperty, Tabs.Count);
-                imgTab.Source = bmpTab;
-                imgTab.HorizontalAlignment = HorizontalAlignment.Stretch;
-                imgTab.VerticalAlignment = VerticalAlignment.Stretch;
-                imgTab.MouseDown += tab_MouseDown;
-                imgTab.Name = $"img{index}{name}";
+                Image imgTab = GenerateTabImage(index, name);
                 Images.Add(Tabs.Count, imgTab);
                 grd.Children.Add(imgTab);
 
-                Label lblTab = new Label();
-                lblTab.Foreground = System.Windows.Media.Brushes.DarkGoldenrod;
-                lblTab.SetValue(Grid.ColumnProperty, Tabs.Count);
-                lblTab.HorizontalAlignment = HorizontalAlignment.Center;
-                lblTab.VerticalAlignment = VerticalAlignment.Center;
-                lblTab.Content = name.Substring(0, name.Length > 6 ? 6 : name.Length) + (name.Length > 6 ? "..." : "");
-                lblTab.MouseDown += tab_MouseDown;
-                lblTab.Name = $"lbl{index}{name}";
+                Label lblTab = GenerateTabLabel(index, name);
                 Labels.Add(Tabs.Count, lblTab);
                 grd.Children.Add(lblTab);
             });
         }
 
+        private void HandleTabSelection(int gridColumn) {
+            SetActiveTab(gridColumn - 1);
+            OnStashTabSelected(gridColumn - 1);
+        }
+
         private void tab_MouseDown(object sender, MouseButtonEventArgs e) {
             UIElement element = (UIElement)sender;
             int col = (int)element.GetValue(Grid.ColumnProperty);
-            SetActiveTab(col - 1);
-            OnStashTabSelected(col - 1);
+            HandleTabSelection(col);
         }
 
         private void UnselectOtherTabs(int selectedTab) {

@@ -239,6 +239,10 @@ namespace PoEW.Application.Controls {
         }
 
         private void PricingForm_Closed(object sender, EventArgs e) {
+            EditPriceNote();
+        }
+
+        private void EditPriceNote() {
             if (PricingFormWin.Price != null) {
                 itemTooltipControl.AddPriceNote(PricingFormWin.Price.ToString());
                 txtbPriceAmount.Text = $"{PricingFormWin.Price.Value}x";
@@ -252,6 +256,8 @@ namespace PoEW.Application.Controls {
             } else {
                 itemTooltipControl.RemovePriceNote();
             }
+
+            PricingFormWin = null;
         }
     }
 }

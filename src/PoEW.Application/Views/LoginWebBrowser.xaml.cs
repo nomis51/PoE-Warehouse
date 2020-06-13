@@ -17,7 +17,7 @@ namespace PoEW.Application.Views {
     /// <summary>
     /// Interaction logic for WebBrowser.xaml
     /// </summary>
-    public partial class WebBrowser {
+    public partial class LoginWebBrowser {
         private string PoEWebsiteLoginPage = "https://www.pathofexile.com/login";
         private string PoEWebsiteAccountPage = "https://www.pathofexile.com/my-account";
         private string PoESessionIdCookieName = "POESESSID";
@@ -27,30 +27,43 @@ namespace PoEW.Application.Views {
 
         public bool Success { get; private set; } = false;
 
-        public WebBrowser() {
+        public LoginWebBrowser() {
             InitializeComponent();
 
             _cookieVisitor = new CookieCollector();
 
+            SetupEvents();
+        }
+
+        private void SetupEvents() {
             webBrowser.FrameLoadEnd += WebBrowser_FrameLoadEnd;
             webBrowser.Address = PoEWebsiteLoginPage;
         }
 
+        private async Task GetSessiondId() {
+            var cookieManager = Cef.GetGlobalCookieManager();
+            cookieManager.VisitAllCookies(_cookieVisitor);
+            var cookies = await _cookieVisitor.Task;
+            var poeSessionIdCookie = cookies.Find(c => c.Name == PoESessionIdCookieName);
+
+            if (poeSessionIdCookie != null) {
+                POESESSID = poeSessionIdCookie.Value;
+            }
+        }
+
+        private void VerifyLogin() {
+            if (Utils.ValidSessionId(POESESSID)) {
+                this.Dispatcher.Invoke(() => {
+                    Success = true;
+                    Close();
+                });
+            }
+        }
+
         private async void WebBrowser_FrameLoadEnd(object sender, CefSharp.FrameLoadEndEventArgs e) {
             if (e.Url == PoEWebsiteAccountPage) {
-                var cookieManager = Cef.GetGlobalCookieManager();
-                cookieManager.VisitAllCookies(_cookieVisitor);
-                var cookies = await _cookieVisitor.Task;
-                var poeSessionIdCookie = cookies.Find(c => c.Name == PoESessionIdCookieName);
-
-                if (poeSessionIdCookie != null) {
-                    POESESSID = poeSessionIdCookie.Value;
-
-                    this.Dispatcher.Invoke(() => {
-                        Success = true;
-                        Close();
-                    });
-                }
+                await GetSessiondId();
+                VerifyLogin();
             }
         }
     }

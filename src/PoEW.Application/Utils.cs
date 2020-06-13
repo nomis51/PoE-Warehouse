@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +21,10 @@ namespace PoEW.Application {
 
                 return bitmapImage;
             }
+        }
+
+        public static bool ValidSessionId(string value) {
+            return new System.Text.RegularExpressions.Regex("[a-z0-9]{32}").IsMatch(value);
         }
 
     }

@@ -18,11 +18,11 @@
 
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
-            <StackPanel>
+            <StackPanel Margin="0 5 0 0">
                 <ToggleButton x:Name="toggleResourceMenu" Click="toggleResourceMenu_Click">
                     <ToggleButton.Content>
-                        <iconPacks:PackIconModern Width="22"
-                                        Height="22"
+                        <iconPacks:PackIconModern Width="20"
+                                        Height="20"
                                         VerticalAlignment="Center"
                                         Kind="Resource" />
                     </ToggleButton.Content>
@@ -146,7 +146,7 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Glyph}" />
+                    <TextBlock Grid.Column="0" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Glyph}" />
                     <TextBlock Grid.Column="1" Margin="5 0 0 2" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" Text="{Binding Label}" />
                 </Grid>
             </DataTemplate>
@@ -176,11 +176,8 @@
             <mah:HamburgerMenu.ItemsSource>
                 <mah:HamburgerMenuItemCollection>
                     <mah:HamburgerMenuHeaderItem Label="Shops"></mah:HamburgerMenuHeaderItem>
-                    
-                    <mah:HamburgerMenuSeparatorItem></mah:HamburgerMenuSeparatorItem>
 
-                    <mah:HamburgerMenuGlyphItem Glyph="test" Label="jkasdf">
-                    </mah:HamburgerMenuGlyphItem>
+                    <mah:HamburgerMenuSeparatorItem></mah:HamburgerMenuSeparatorItem>
                 </mah:HamburgerMenuItemCollection>
             </mah:HamburgerMenu.ItemsSource>
 
@@ -197,7 +194,11 @@
         <controls:StashTabSelectorControl x:Name="stashTabSelectorControl" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" ></controls:StashTabSelectorControl>
         <controls:StashTabControl Margin="1" x:Name="stashTabControl" Grid.Row="1" Grid.Column="2"></controls:StashTabControl>
 
-        <wpf:ChromiumWebBrowser x:Name="webBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://www.pathofexile.com/trade"/>
+        <wpf:ChromiumWebBrowser x:Name="webBrowser_PoETrade" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://www.pathofexile.com/trade"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_ChallengeCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/currency"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_StandardCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/standard/currency"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_Builds" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/builds"/>
+
         <mah:ProgressRing Name="loaderWebBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="False"></mah:ProgressRing>
 
         <mah:ProgressRing Name="loaderStash" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True"></mah:ProgressRing>

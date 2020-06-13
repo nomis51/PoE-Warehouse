@@ -6,17 +6,71 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:PoEW.Application" xmlns:controls="clr-namespace:PoEW.Application.Controls"
-                 mc:Ignorable="d"
+        xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
+        mc:Ignorable="d"
         Title="PoE Warehouse" 
         GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
         ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Height="600"
-        Width="800">
+        Width="900">
 
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
-
+            <StackPanel>
+                <ToggleButton x:Name="toggleResourceMenu" Click="toggleResourceMenu_Click">
+                    <ToggleButton.Content>
+                        <iconPacks:PackIconModern Width="22"
+                                        Height="22"
+                                        VerticalAlignment="Center"
+                                        Kind="Resource" />
+                    </ToggleButton.Content>
+                </ToggleButton>
+                <Popup Name="popResourceMenu" SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Ideal"
+                       StaysOpen="False"
+                       PlacementTarget="{Binding }" Placement="Bottom">
+                    <Border BorderBrush="White" BorderThickness="1"
+                            Background="Gray">
+                        <StackPanel DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=mah:MetroWindow}}">
+                            <MenuItem Name="menItPoETrade" ToolTip="Path of Exile Official Trade Website" Header="Path of Exile Trade" FontSize="12" Click="menItPoETrade_Click">
+                                <MenuItem.Icon>
+                                    <iconPacks:PackIconFontAwesome Width="20"
+                                        Height="10"
+                                        VerticalAlignment="Center"
+                                        Kind="ExchangeAltSolid" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator Margin="0 2 0 2 "/>
+                            <MenuItem Name="menuItPoENinjaCurrency" ToolTip="https://poe.ninja/league/currency" Header="poe.ninja Currency" FontSize="12" Click="menuItPoENinjaCurrency_Click">
+                                <MenuItem.Icon>
+                                    <iconPacks:PackIconFontAwesome Width="20"
+                                        Height="10"
+                                        VerticalAlignment="Center"
+                                        Kind="UserNinjaSolid" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Name="menuItPoENinjaBuilds" ToolTip="https://poe.ninja/challenge/builds" Header="poe.ninja Builds" FontSize="12" Click="menuItPoENinjaBuilds_Click">
+                                <MenuItem.Icon>
+                                    <iconPacks:PackIconFontAwesome Width="20"
+                                        Height="10"
+                                        VerticalAlignment="Center"
+                                        Kind="UserNinjaSolid" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator Margin="0 2 0 2 "/>
+                            <MenuItem Name="menItQuit" ToolTip="Quit PoE Warehouse" Header="Quit" FontSize="12" Click="menItQuit_Click">
+                                <MenuItem.Icon>
+                                    <iconPacks:PackIconModern Width="20"
+                                        Height="10"
+                                        VerticalAlignment="Center"
+                                        Kind="Close" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </StackPanel>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
 
@@ -26,7 +80,7 @@
 
             <TextBlock x:Name="txtbThreadId" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2"></TextBlock>
 
-            <Button Content="Shop" Name="btnAddShop" Click="btnAddShop_Click">
+            <!--<Button Content="Shop" Name="btnAddShop" Click="btnAddShop_Click">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -38,7 +92,7 @@
                         </StackPanel>
                     </DataTemplate>
                 </Button.ContentTemplate>
-            </Button>
+            </Button>-->
 
             <Button Content="Settings">
                 <Button.ContentTemplate>
@@ -73,27 +127,79 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="40"></RowDefinition>
             <RowDefinition Height="424"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150"></ColumnDefinition>
+            <ColumnDefinition Width="50"></ColumnDefinition>
             <ColumnDefinition Width="10"></ColumnDefinition>
             <ColumnDefinition Width="424"></ColumnDefinition>
+            <ColumnDefinition Width="10"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
+        <Grid.Resources>
+            <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type mah:HamburgerMenuGlyphItem}">
+                <Grid Height="48">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="48" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Glyph}" />
+                    <TextBlock Grid.Column="1" Margin="5 0 0 2" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" Text="{Binding Label}" />
+                </Grid>
+            </DataTemplate>
+        </Grid.Resources>
+
         <!--<DockPanel Name="dockShopThreadTabs"></DockPanel>-->
-        <Border BorderBrush="White" BorderThickness="1" Grid.Row="0" Grid.Column="0" >
+        <!-- <Border BorderBrush="White" BorderThickness="1" Grid.Row="0" Grid.Column="0" >
             <TextBlock Text="Your Shops" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" FontSize="14"></TextBlock>
-        </Border>
-        <Border BorderBrush="White" BorderThickness="1" Grid.Row="1" Grid.Column="0" Grid.RowSpan="3" >
+        </Border> -->
+        <!--<Border BorderBrush="White" BorderThickness="1" Grid.Row="1" Grid.Column="0" Grid.RowSpan="3" >
             <ListView Name="lstvShopThreads" SelectionChanged="lstvShopThreads_SelectionChanged" HorizontalAlignment="Center" VerticalAlignment="Top">
             </ListView>
-        </Border>
+        </Border>-->
 
-        <controls:StashTabSelectorControl x:Name="stashTabSelectorControl" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" ></controls:StashTabSelectorControl>
-        <controls:StashTabControl Margin="1" x:Name="stashTabControl" Grid.Row="2" Grid.Column="2"></controls:StashTabControl>
+        <mah:HamburgerMenu 
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            Panel.ZIndex="9"
+            x:Name="hamMenShopThreads"
+            ItemTemplate="{StaticResource MenuItemTemplate}"
+            OptionsItemTemplate="{StaticResource MenuItemTemplate}"
+            ItemClick="hamMenShopThreads_ItemClick"
+            DisplayMode="CompactOverlay">
+            <!--  Items  -->
+            <mah:HamburgerMenu.ItemsSource>
+                <mah:HamburgerMenuItemCollection>
+                    <mah:HamburgerMenuHeaderItem Label="Shops"></mah:HamburgerMenuHeaderItem>
+                    
+                    <mah:HamburgerMenuSeparatorItem></mah:HamburgerMenuSeparatorItem>
+
+                    <mah:HamburgerMenuGlyphItem Glyph="test" Label="jkasdf">
+                    </mah:HamburgerMenuGlyphItem>
+                </mah:HamburgerMenuItemCollection>
+            </mah:HamburgerMenu.ItemsSource>
+
+            <!--  Content  -->
+            <mah:HamburgerMenu.ContentTemplate>
+                <DataTemplate DataType="{x:Type mah:HamburgerMenuItem}">
+                    <Grid x:Name="TheContentGrid">
+                        <ContentControl x:Name="TheContent" Content="{Binding Tag}" />
+                    </Grid>
+                </DataTemplate>
+            </mah:HamburgerMenu.ContentTemplate>
+        </mah:HamburgerMenu>
+
+        <controls:StashTabSelectorControl x:Name="stashTabSelectorControl" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" ></controls:StashTabSelectorControl>
+        <controls:StashTabControl Margin="1" x:Name="stashTabControl" Grid.Row="1" Grid.Column="2"></controls:StashTabControl>
+
+        <wpf:ChromiumWebBrowser x:Name="webBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://www.pathofexile.com/trade"/>
+        <mah:ProgressRing Name="loaderWebBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="False"></mah:ProgressRing>
+
+        <mah:ProgressRing Name="loaderStash" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True"></mah:ProgressRing>
     </Grid>
 </mah:MetroWindow>

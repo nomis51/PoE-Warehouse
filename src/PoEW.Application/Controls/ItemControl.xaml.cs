@@ -30,7 +30,6 @@ namespace PoEW.Application.Controls {
         SolidColorBrush DarkBlue = (SolidColorBrush)(new BrushConverter().ConvertFrom("#0e0f2f"));
         SolidColorBrush DarkRed = (SolidColorBrush)(new BrushConverter().ConvertFrom("#2a0403"));
 
-        PricingForm PricingFormWin;
         List<Image> SocketsImage = new List<Image>();
 
         public ItemControl(Item item, Price price = null) {
@@ -46,6 +45,10 @@ namespace PoEW.Application.Controls {
             SetStackSize();
             SetSockets();
             SetItemBackground();
+        }
+
+        private void SetupEvents() {
+            WindowController.Instance().PricingFormWin.Closed += PricingForm_Closed;
         }
 
         private void SetItemBackground() {
@@ -241,9 +244,7 @@ namespace PoEW.Application.Controls {
         }
 
         private void imgIconUrl_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
-            PricingFormWin = new PricingForm(Item.Id);
-            PricingFormWin.Closed += PricingForm_Closed;
-            PricingFormWin.ShowDialog();
+            WindowController.Instance().PricingFormWin.ShowDialog();
         }
 
         private void PricingForm_Closed(object sender, EventArgs e) {
@@ -251,21 +252,18 @@ namespace PoEW.Application.Controls {
         }
 
         private void EditPriceNote() {
-            if (PricingFormWin.Price != null) {
-                itemTooltipControl.AddPriceNote(PricingFormWin.Price.ToString());
-                txtbPriceAmount.Text = $"{PricingFormWin.Price.Value}x";
+            if (WindowController.Instance().PricingFormWin.Price != null) {
+                itemTooltipControl.AddPriceNote(WindowController.Instance().PricingFormWin.Price.ToString());
+                txtbPriceAmount.Text = $"{ WindowController.Instance().PricingFormWin.Price.Value}x";
 
-                if (PricingFormWin.Price.Value > 999 && Item.Width < 2) {
+                if (WindowController.Instance().PricingFormWin.Price.Value > 999 && Item.Width < 2) {
                     txtbPriceAmount.FontSize = 8;
                 }
 
-                imgPriceCurrency.Source = new BitmapImage(new Uri(Shop.CurrencyTypeToImageUrl[PricingFormWin.Price.Currency]));
-                PricingFormWin = null;
+                imgPriceCurrency.Source = new BitmapImage(new Uri(Shop.CurrencyTypeToImageUrl[WindowController.Instance().PricingFormWin.Price.Currency]));
             } else {
                 itemTooltipControl.RemovePriceNote();
             }
-
-            PricingFormWin = null;
         }
     }
 }

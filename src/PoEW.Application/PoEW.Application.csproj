@@ -297,6 +297,7 @@
     <Compile Include="Views\LoginWebBrowser.xaml.cs">
       <DependentUpon>LoginWebBrowser.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WindowController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

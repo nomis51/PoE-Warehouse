@@ -28,9 +28,11 @@ namespace PoEW.Application.Views {
 
         public bool Success { get; private set; } = false;
 
-        public PricingForm(string itemId) {
+        public PricingForm() {
             InitializeComponent();
+        }
 
+        public void SetItemId(string itemId) {
             ItemId = itemId;
 
             Init();

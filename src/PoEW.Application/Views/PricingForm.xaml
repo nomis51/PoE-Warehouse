@@ -9,6 +9,7 @@
         mc:Ignorable="d"
         Width="300"
         Height="150"
+        WindowStartupLocation="CenterScreen"
         Title="Pricing Form">
     <Grid>
         <Grid.RowDefinitions>

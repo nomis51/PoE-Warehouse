@@ -39,24 +39,8 @@ namespace PoEW.Application.Controls {
         }
 
         private void LoadAssets() {
-            bmpTab = ToBitmapImage(Properties.Resources.tab);
-            bmpSelectedTab = ToBitmapImage(Properties.Resources.tab_selected);
-        }
-
-        public BitmapImage ToBitmapImage(Bitmap bitmap) {
-            using (var memory = new MemoryStream()) {
-                bitmap.Save(memory, ImageFormat.Png);
-                memory.Position = 0;
-
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-
-                return bitmapImage;
-            }
+            bmpTab = Utils.ToBitmapImage(Properties.Resources.tab);
+            bmpSelectedTab = Utils.ToBitmapImage(Properties.Resources.tab_selected);
         }
 
         public void SetActiveTab(int index) {

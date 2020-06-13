@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
+
 namespace PoEW.API {
     static public class Utils {
+      
         static public string GetCsrfToken(string htmlPageContent, string tokenName) {
             string needle = $"name=\"{tokenName}\" value=\"";
 

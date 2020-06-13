@@ -96,22 +96,6 @@ namespace PoEW.Application.Controls {
             }
         }
 
-        public BitmapImage ToBitmapImage(System.Drawing.Bitmap bitmap) {
-            using (var memory = new MemoryStream()) {
-                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
-                memory.Position = 0;
-
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-
-                return bitmapImage;
-            }
-        }
-
         private ItemSocketLayout GetSocketLayout() {
             if (Item.Width == 2 && Item.Height == 3) {
                 return ItemSocketLayout.Six;
@@ -138,22 +122,22 @@ namespace PoEW.Application.Controls {
                 img.VerticalAlignment = VerticalAlignment.Center;
                 img.Width = 25;
                 img.Height = 25;
-                // Avoid tooltip ftom not displaying, because the actual item image isn't mouse hover
+                // Avoid tooltip from not displaying, because the actual item image isn't mouse hover
                 img.MouseEnter += imgIconUrl_MouseEnter;
                 img.MouseLeave += imgIconUrl_MouseLeave;
 
 
                 switch (socket.Colour) {
                     case "R":
-                        img.Source = ToBitmapImage(Properties.Resources.red_socket);
+                        img.Source = Utils.ToBitmapImage(Properties.Resources.red_socket);
                         break;
 
                     case "G":
-                        img.Source = ToBitmapImage(Properties.Resources.green_socket);
+                        img.Source = Utils.ToBitmapImage(Properties.Resources.green_socket);
                         break;
 
                     case "B":
-                        img.Source = ToBitmapImage(Properties.Resources.blue_socket);
+                        img.Source = Utils.ToBitmapImage(Properties.Resources.blue_socket);
                         break;
                 }
 

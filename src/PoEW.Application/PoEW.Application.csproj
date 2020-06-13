@@ -281,6 +281,7 @@
       <DependentUpon>SteamLoginControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CookieCollector.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="Views\ItemTooltip.xaml.cs">
       <DependentUpon>ItemTooltip.xaml</DependentUpon>
     </Compile>

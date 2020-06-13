@@ -19,5 +19,5 @@ It's a multi-functionality trade manager. Greatly inspired by the Acquisition pr
 - Support multi-user
 - Expiration date and notification
 - Show/Hide items on trading websites
-- Price cheking and notifications
+- Price checking and notifications
 - Make the UI better

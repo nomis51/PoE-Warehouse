@@ -12,6 +12,17 @@ using System.Threading.Tasks;
 
 namespace PoEW.Data {
     public class Session {
+        #region Singleton
+        private static Session _instance;
+        public static Session Instance() {
+            if (_instance == null) {
+                _instance = new Session();
+            }
+
+            return _instance;
+        }
+        #endregion
+
         private Dictionary<int, Shop> ShopThreads = new Dictionary<int, Shop>();
         private Dictionary<string, List<StashTab>> StashTabs = new Dictionary<string, List<StashTab>>();
         public Player Player { get; private set; }
@@ -33,7 +44,7 @@ namespace PoEW.Data {
         public delegate void LocalStashTabsUpdated(Dictionary<int, StashTab> stashTabs);
         public static event LocalStashTabsUpdated OnLocalStashTabsUpdated;
 
-        public Session() {
+        private Session() {
             Shop.OnRequestShopThreadUpdate += Shop_OnRequestShopThreadUpdate;
         }
 
@@ -243,7 +254,7 @@ namespace PoEW.Data {
                     ThreadId = threadId,
                     League = Leagues[leagueId],
                     Title = title
-                }) ;
+                });
             }
         }
 

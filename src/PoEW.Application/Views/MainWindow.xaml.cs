@@ -33,7 +33,6 @@ namespace PoEW.Application {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : MetroWindow {
-        private Session _session;
         private LoginWindow LoginWin = new LoginWindow();
         private ShopForm ShopFormWin = new ShopForm();
 
@@ -52,8 +51,6 @@ namespace PoEW.Application {
         public MainWindow() {
             InitializeComponent();
 
-            _session = new Session();
-
             stashTabSelectorControl.OnStashTabSelected += StashTabSelectorControl_OnStashTabSelected;
 
             PricingForm.OnPriceAdded += PricingForm_OnPriceAdded;
@@ -61,7 +58,7 @@ namespace PoEW.Application {
 
             Session.OnLocalStashTabsUpdated += Session_OnLocalStashTabsUpdated;
 
-            var lastPlayer = _session.GetLastPlayer().Result;
+            var lastPlayer = Session.Instance().GetLastPlayer().Result;
 
             if (lastPlayer != null) {
                 LoginWin.SetPlayer(lastPlayer);
@@ -115,80 +112,80 @@ namespace PoEW.Application {
                 stashTabSelectorControl.AddTab(tab.Key, tab.Value.Name);
             }
 
-            stashTabControl.SetStashTab(stashTabs.Values.ElementAt(_session.GetSelectedTabIndex()), _session.GetShop().GetPrices());
+            stashTabControl.SetStashTab(stashTabs.Values.ElementAt(Session.Instance().GetSelectedTabIndex()), Session.Instance().GetShop().GetPrices());
         }
 
         private void PricingForm_OnPriceRemoved(string itemId) {
-            _session.GetShop().UnsetPrice(itemId);
+            Session.Instance().GetShop().UnsetPrice(itemId);
         }
 
         private void PricingForm_OnPriceAdded(Price price, string itemId) {
-            _session.GetShop().SetPrice(itemId, price);
+            Session.Instance().GetShop().SetPrice(itemId, price);
         }
 
         private void StashTabSelectorControl_OnStashTabSelected(int index) {
-            _session.SetSelectedTab(index);
-            stashTabControl.SetStashTab(_session.GetShop().GetStashTab(index), _session.GetShop().GetPrices());
+            Session.Instance().SetSelectedTab(index);
+            stashTabControl.SetStashTab(Session.Instance().GetShop().GetStashTab(index), Session.Instance().GetShop().GetPrices());
         }
 
         private async void ShopFormWin_Closed(object sender, EventArgs e) {
             if (ShopFormWin.Success) {
-                if (!_session.AnyShops(ShopFormWin.ThreadId)) {
-                    await _session.AddShop(ShopFormWin.ThreadId, ShopFormWin.League);
-                    _session.SetCurrentThreadId(ShopFormWin.ThreadId);
+                if (!Session.Instance().AnyShops(ShopFormWin.ThreadId)) {
+                    await Session.Instance().AddShop(ShopFormWin.ThreadId, ShopFormWin.League);
+                    Session.Instance().SetCurrentThreadId(ShopFormWin.ThreadId);
 
                     HamburderMenuItems.Add(HamburgerMenuHeader);
                     HamburderMenuItems.Add(HamburgerMenuSeparator);
                     HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
-                    item.Label = _session.GetShop().Title;
+                    item.Label = Session.Instance().GetShop().Title;
                     item.Glyph = ShopFormWin.ThreadId.ToString();
                     HamburderMenuItems.Add(item);
                     hamMenShopThreads.ItemsSource = HamburderMenuItems;
 
                     _ = InitUI(ShopFormWin.ThreadId, ShopFormWin.League);
                 }
-            } else if (!_session.AnyShops()) {
+            } else if (!Session.Instance().AnyShops()) {
                 ShopFormWin = new ShopForm();
                 ShopFormWin.Closed += ShopFormWin_Closed;
-                ShopFormWin.SetLeagues(_session.GetLeagues());
+                ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
                 ShopFormWin.ShowDialog();
             }
         }
 
         private async Task InitUI(int threadId, string league) {
-            _session.IsLocalStashUpdaterPaused = true;
+            Session.Instance().IsLocalStashUpdaterPaused = true;
 
             txtbThreadId.Text = $"Thread {threadId}";
             txtbLeague.Text = league;
 
-            await _session.LoadLocalStash();
+            await Session.Instance().LoadLocalStash();
 
             stashTabSelectorControl.ClearTabs();
 
-            if (!_session.GetShop().GetStashTabs().Any()) {
+            if (!Session.Instance().GetShop().GetStashTabs().Any()) {
                 stashTabControl.ClearStashTab();
-                await _session.UpdateLocalStash(threadId);
+                await Session.Instance().UpdateLocalStash(threadId);
             }
 
-            foreach (var tab in _session.GetShop().GetStashTabsName()) {
+            foreach (var tab in Session.Instance().GetShop().GetStashTabsName()) {
                 stashTabSelectorControl.AddTab(tab.Value, tab.Key);
             }
 
-            if (_session.GetShop().GetStashTabs().Any()) {
-                _session.SetSelectedTab(0);
-                stashTabControl.SetStashTab(_session.GetShop().GetStashTab(0), _session.GetShop().GetPrices());
+            if (Session.Instance().GetShop().GetStashTabs().Any()) {
+                Session.Instance().SetSelectedTab(0);
+                stashTabControl.SetStashTab(Session.Instance().GetShop().GetStashTab(0), Session.Instance().GetShop().GetPrices());
                 stashTabSelectorControl.SetActiveTab(0);
             }
 
-            _session.IsLocalStashUpdaterPaused = false;
+            Session.Instance().IsLocalStashUpdaterPaused = false;
 
             loaderStash.IsActive = false;
         }
 
         private async void BtnChangeShopThread_Click(object sender, RoutedEventArgs e) {
             Button btn = (Button)sender;
-            _session.SetCurrentThreadId(Convert.ToInt32(btn.Content.ToString().Substring(7)));
-            await InitUI(_session.CurrentThreadId, _session.GetShop().League.Name);
+            Session.Instance().SetCurrentThreadId(Convert.ToInt32(btn.Content.ToString().Substring(7)));
+            await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
         }
 
         private async void LoginWin_Closed(object sender, EventArgs e) {
@@ -197,20 +194,20 @@ namespace PoEW.Application {
                 return;
             }
 
-            await _session.SetConnectedPlayer(new Player() {
+            await Session.Instance().SetConnectedPlayer(new Player() {
                 SessionId = LoginWin.POESESSID
             });
 
-            btnAccount.Content = _session.Player.AccountName;
+            btnAccount.Content = Session.Instance().Player.AccountName;
 
-            _session.RunAutoOnlineUpdater();
+            Session.Instance().RunAutoOnlineUpdater();
 
-            await _session.LoadShops();
+            await Session.Instance().LoadShops();
 
             HamburderMenuItems.Add(HamburgerMenuHeader);
             HamburderMenuItems.Add(HamburgerMenuSeparator);
 
-            foreach (var shop in _session.GetShops()) {
+            foreach (var shop in Session.Instance().GetShops()) {
                 HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
                 item.Label = shop.Title;
                 item.Glyph = shop.ThreadId.ToString();
@@ -220,36 +217,20 @@ namespace PoEW.Application {
             hamMenShopThreads.ItemsSource = HamburderMenuItems;
             hamMenShopThreads.SelectedIndex = 0;
 
-            if (!_session.AnyShops()) {
+            if (!Session.Instance().AnyShops()) {
                 ShopFormWin = new ShopForm();
                 ShopFormWin.Closed += ShopFormWin_Closed;
-                ShopFormWin.SetLeagues(_session.GetLeagues());
+                ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
                 ShopFormWin.ShowDialog();
             } else {
-                await InitUI(_session.CurrentThreadId, _session.GetShop().League.Name);
-            }
-        }
-
-        public BitmapImage ToBitmapImage(System.Drawing.Bitmap bitmap) {
-            using (var memory = new MemoryStream()) {
-                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
-                memory.Position = 0;
-
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-
-                return bitmapImage;
+                await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
             }
         }
 
         private void btnAddShop_Click(object sender, RoutedEventArgs e) {
             ShopFormWin = new ShopForm();
             ShopFormWin.Closed += ShopFormWin_Closed;
-            ShopFormWin.SetLeagues(_session.GetLeagues());
+            ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
             ShopFormWin.ShowDialog();
         }
 
@@ -282,8 +263,8 @@ namespace PoEW.Application {
 
             string url = Url_PoENinja_Currency_Template;
 
-            if (_session.AnyShops()) {
-                url = url.Replace("$league$", _session.GetShop().League.Name == "Standard" ? "standard" : "challenge");
+            if (Session.Instance().AnyShops()) {
+                url = url.Replace("$league$", Session.Instance().GetShop().League.Name == "Standard" ? "standard" : "challenge");
             }
 
             if (webBrowser.Address != url) {
@@ -294,8 +275,8 @@ namespace PoEW.Application {
         private async void hamMenShopThreads_ItemClick(object sender, ItemClickEventArgs args) {
             HamburgerMenuGlyphItem item = (HamburgerMenuGlyphItem)hamMenShopThreads.SelectedItem;
             int threadId = Convert.ToInt32(item.Glyph);
-            _session.SetCurrentThreadId(threadId);
-            await InitUI(_session.CurrentThreadId, _session.GetShop().League.Name);
+            Session.Instance().SetCurrentThreadId(threadId);
+            await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
         }
     }
 }

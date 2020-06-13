@@ -57,7 +57,7 @@ namespace PoEW.Application.Views {
 
         private void btnClear_Click(object sender, RoutedEventArgs e) {
             Price = null;
-            OnPriceRemoved(ItemId);
+            Session.Instance().GetShop().UnsetPrice(ItemId);
             Success = true;
             Close();
         }
@@ -66,7 +66,8 @@ namespace PoEW.Application.Views {
             int price = -1;
             if (cboTypes.SelectedIndex != -1 && cboCurrencies.SelectedIndex != -1 && !string.IsNullOrEmpty(txtPrice.Text) && int.TryParse(txtPrice.Text, out price)) {
                 Price = new Price(Shop.StringToCurrencyType[cboCurrencies.SelectedValue.ToString()], Shop.PrefixToPriceType[cboTypes.SelectedValue.ToString()], price);
-                OnPriceAdded(Price, ItemId);
+
+                Session.Instance().GetShop().SetPrice(ItemId, Price);
 
                 Success = true;
                 Close();

@@ -173,7 +173,7 @@ namespace PoEW.Application {
 
             HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
             item.Label = Session.Instance().GetShop().Title;
-            item.Glyph = WindowController.Instance().ShopFormWin.ThreadId.ToString();
+            item.Glyph = WindowController.Instance().ShopFormWin.League;
             AddHamMenuItem(item);
 
             _ = InitUI(WindowController.Instance().ShopFormWin.ThreadId, WindowController.Instance().ShopFormWin.League);
@@ -252,7 +252,7 @@ namespace PoEW.Application {
             foreach (var shop in Session.Instance().GetShops()) {
                 HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
                 item.Label = shop.Title;
-                item.Glyph = shop.ThreadId.ToString();
+                item.Glyph = shop.League.Name.ToString();
                 HamburderMenuItems.Add(item);
             }
 

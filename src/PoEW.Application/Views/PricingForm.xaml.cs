@@ -23,20 +23,16 @@ namespace PoEW.Application.Views {
         private string Url_Chaos = "https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png?w=1&h=1&scale=1&v=c60aa876dd6bab31174df91b1da1b4f9";
         private string Url_Exalt = "https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyAddModToRare.png?w=1&h=1&scale=1&v=1745ebafbd533b6f91bccf588ab5efc5";
 
-        public delegate void PriceAdded(Price price, string itemId);
-        public static event PriceAdded OnPriceAdded;
-
-        public delegate void PriceRemoved(string itemId);
-        public static event PriceRemoved OnPriceRemoved;
-
         private string ItemId;
         public Price Price;
 
         public bool Success { get; private set; } = false;
 
-        public PricingForm(string itemId) {
+        public PricingForm() {
             InitializeComponent();
+        }
 
+        public void SetItemId(string itemId) {
             ItemId = itemId;
 
             Init();
@@ -56,21 +52,38 @@ namespace PoEW.Application.Views {
         }
 
         private void btnClear_Click(object sender, RoutedEventArgs e) {
+            UnsetPrice();
+        }
+
+        private void UnsetPrice() {
             Price = null;
-            OnPriceRemoved(ItemId);
+            Session.Instance().GetShop().UnsetPrice(ItemId);
             Success = true;
             Close();
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e) {
+            SetPrice();
+        }
+
+        private void SetPrice() {
             int price = -1;
-            if (cboTypes.SelectedIndex != -1 && cboCurrencies.SelectedIndex != -1 && !string.IsNullOrEmpty(txtPrice.Text) && int.TryParse(txtPrice.Text, out price)) {
-                Price = new Price(Shop.StringToCurrencyType[cboCurrencies.SelectedValue.ToString()], Shop.PrefixToPriceType[cboTypes.SelectedValue.ToString()], price);
-                OnPriceAdded(Price, ItemId);
+
+            if ((price = ValidatePrice()) != -1) {
+                Session.Instance().GetShop().SetPrice(ItemId, Price);
 
                 Success = true;
                 Close();
             }
+        }
+
+        private int ValidatePrice() {
+            int price = -1;
+            if (cboTypes.SelectedIndex != -1 && cboCurrencies.SelectedIndex != -1 && !string.IsNullOrEmpty(txtPrice.Text) && int.TryParse(txtPrice.Text, out price)) {
+                return price;
+            }
+
+            return -1;
         }
     }
 }

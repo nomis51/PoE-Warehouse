@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="PoEW.Application.Views.WebBrowser"
+﻿<mah:MetroWindow x:Class="PoEW.Application.Views.LoginWebBrowser "
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"

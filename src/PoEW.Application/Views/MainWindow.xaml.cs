@@ -27,23 +27,20 @@ using ListViewItem = System.Windows.Controls.ListViewItem;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
+using CefSharp.Wpf;
+using CefSharp;
 
 namespace PoEW.Application {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : MetroWindow {
-        private Session _session;
-        private LoginWindow LoginWin = new LoginWindow();
-        private ShopForm ShopFormWin = new ShopForm();
-
-        private Dictionary<int, Button> ShopThreadButtons = new Dictionary<int, Button>();
-
         private string Url_PoETrade = "https://www.pathofexile.com/trade";
         private string Url_PoENinja_Currency_Template = "https://poe.ninja/$league$/currency";
         private string Url_PoENinja_Builds = "https://poe.ninja/challenge/builds";
         private Regex regPoENinjaUrl = new Regex("https://poe.ninja/[a-z]+/(builds|currency)");
         private string LastUrlLoaded = "";
+        private string LoadingUrl;
 
         ObservableCollection<HamburgerMenuItemBase> HamburderMenuItems = new ObservableCollection<HamburgerMenuItemBase>();
         HamburgerMenuHeaderItem HamburgerMenuHeader;
@@ -52,28 +49,59 @@ namespace PoEW.Application {
         public MainWindow() {
             InitializeComponent();
 
-            _session = new Session();
+            Init();
 
-            stashTabSelectorControl.OnStashTabSelected += StashTabSelectorControl_OnStashTabSelected;
+            WindowController.Instance().LoginWin.ShowDialog();
+        }
 
-            PricingForm.OnPriceAdded += PricingForm_OnPriceAdded;
-            PricingForm.OnPriceRemoved += PricingForm_OnPriceRemoved;
+        private void Init() {
+            LoadingUrl = Url_PoETrade;
 
-            Session.OnLocalStashTabsUpdated += Session_OnLocalStashTabsUpdated;
-
-            var lastPlayer = _session.GetLastPlayer().Result;
+            var lastPlayer = Session.Instance().GetLastPlayer().Result;
 
             if (lastPlayer != null) {
-                LoginWin.SetPlayer(lastPlayer);
+                WindowController.Instance().LoginWin.SetPlayer(lastPlayer);
             }
-
-            webBrowser.FrameLoadEnd += WebBrowser_FrameLoadEnd;
-            webBrowser.FrameLoadStart += WebBrowser_FrameLoadStart;
 
             InitHamburgerMenuItems();
 
-            LoginWin.Closed += LoginWin_Closed;
-            LoginWin.ShowDialog();
+            SetupEvents();
+        }
+
+        private async Task SetPoETradeBrowserCookie() {
+            var cookieManager = Cef.GetGlobalCookieManager();
+            Cookie cookie = new Cookie();
+            cookie.Name = "POESESSID";
+            cookie.Value = Session.Instance().Player.SessionId;
+            if (await cookieManager.SetCookieAsync("https://www.pathofexile.com/trade", cookie)) {
+                var g = 0;
+            }
+        }
+
+        private void SetupEvents() {
+            WindowController.Instance().LoginWin.Closed += LoginWin_Closed;
+            WindowController.Instance().ShopFormWin.IsVisibleChanged += ShopFormWin_IsVisibleChanged; ;
+            stashTabSelectorControl.OnStashTabSelected += StashTabSelectorControl_OnStashTabSelected;
+            Session.OnLocalStashTabsUpdated += Session_OnLocalStashTabsUpdated;
+            webBrowser_PoENinja_Builds.FrameLoadEnd += WebBrowser_FrameLoadEnd;
+            webBrowser_PoENinja_Builds.FrameLoadStart += WebBrowser_FrameLoadStart;
+            webBrowser_PoENinja_ChallengeCurrency.FrameLoadEnd += WebBrowser_FrameLoadEnd;
+            webBrowser_PoENinja_ChallengeCurrency.FrameLoadStart += WebBrowser_FrameLoadStart;
+            webBrowser_PoENinja_StandardCurrency.FrameLoadEnd += WebBrowser_FrameLoadEnd;
+            webBrowser_PoENinja_StandardCurrency.FrameLoadStart += WebBrowser_FrameLoadStart;
+            webBrowser_PoETrade.FrameLoadEnd += WebBrowser_FrameLoadEnd;
+            webBrowser_PoETrade.FrameLoadStart += WebBrowser_FrameLoadStart;
+            webBrowser_PoETrade.IsBrowserInitializedChanged += WebBrowser_PoETrade_IsBrowserInitializedChanged; ;
+        }
+
+        private void ShopFormWin_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+          if(WindowController.Instance().ShopFormWin.Visibility == Visibility.Hidden) {
+                ShopFormWin_Closed();
+            }
+        }
+
+        private void WebBrowser_PoETrade_IsBrowserInitializedChanged(object sender, DependencyPropertyChangedEventArgs e) {
+            _ = SetPoETradeBrowserCookie();
         }
 
         private void InitHamburgerMenuItems() {
@@ -82,28 +110,50 @@ namespace PoEW.Application {
             HamburgerMenuSeparator = new HamburgerMenuSeparatorItem();
         }
 
+        private ChromiumWebBrowser GetVisibleBrowser() {
+            if (webBrowser_PoETrade.Visibility == Visibility.Visible) {
+                return webBrowser_PoETrade;
+            } else if (webBrowser_PoENinja_StandardCurrency.Visibility == Visibility.Visible) {
+                return webBrowser_PoENinja_StandardCurrency;
+            } else if (webBrowser_PoENinja_ChallengeCurrency.Visibility == Visibility.Visible) {
+                return webBrowser_PoENinja_ChallengeCurrency;
+            } else if (webBrowser_PoENinja_Builds.Visibility == Visibility.Visible) {
+                return webBrowser_PoENinja_Builds;
+            }
+
+            return null;
+        }
+
         private void WebBrowser_FrameLoadStart(object sender, CefSharp.FrameLoadStartEventArgs e) {
+            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)sender;
             this.Dispatcher.Invoke(() => {
-                if (LastUrlLoaded != webBrowser.Address) {
-                    loaderWebBrowser.IsActive = true;
-                    webBrowser.Visibility = Visibility.Hidden;
+                var visibleBrowser = GetVisibleBrowser();
+
+                if (visibleBrowser != null && visibleBrowser.Name == webBrowser.Name) {
+                    if (LastUrlLoaded != webBrowser.Address) {
+                        loaderWebBrowser.IsActive = true;
+                    }
                 }
             });
         }
 
         private void WebBrowser_FrameLoadEnd(object sender, CefSharp.FrameLoadEndEventArgs e) {
+            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)sender;
             this.Dispatcher.Invoke(() => {
-                if (LastUrlLoaded != webBrowser.Address) {
-                    LastUrlLoaded = webBrowser.Address;
+                var visibleBrowser = GetVisibleBrowser();
 
-                    if (regPoENinjaUrl.IsMatch(webBrowser.Address)) {
-                        webBrowser.ZoomLevel = 5.46149645 * Math.Log(60) - 25.12;
-                    } else {
-                        webBrowser.ZoomLevel = 0;
+                if (visibleBrowser != null && visibleBrowser.Name == webBrowser.Name) {
+                    if (LastUrlLoaded != webBrowser.Address) {
+                        LastUrlLoaded = webBrowser.Address;
+
+                        if (regPoENinjaUrl.IsMatch(webBrowser.Address)) {
+                            webBrowser.ZoomLevel = 5.46149645 * Math.Log(60) - 25.12;
+                        } else {
+                            webBrowser.ZoomLevel = 0;
+                        }
+
+                        loaderWebBrowser.IsActive = false;
                     }
-
-                    loaderWebBrowser.IsActive = false;
-                    webBrowser.Visibility = Visibility.Visible;
                 }
             });
         }
@@ -115,142 +165,133 @@ namespace PoEW.Application {
                 stashTabSelectorControl.AddTab(tab.Key, tab.Value.Name);
             }
 
-            stashTabControl.SetStashTab(stashTabs.Values.ElementAt(_session.GetSelectedTabIndex()), _session.GetShop().GetPrices());
-        }
-
-        private void PricingForm_OnPriceRemoved(string itemId) {
-            _session.GetShop().UnsetPrice(itemId);
-        }
-
-        private void PricingForm_OnPriceAdded(Price price, string itemId) {
-            _session.GetShop().SetPrice(itemId, price);
+            stashTabControl.SetStashTab(stashTabs.Values.ElementAt(Session.Instance().GetSelectedTabIndex()), Session.Instance().GetShop().GetPrices());
         }
 
         private void StashTabSelectorControl_OnStashTabSelected(int index) {
-            _session.SetSelectedTab(index);
-            stashTabControl.SetStashTab(_session.GetShop().GetStashTab(index), _session.GetShop().GetPrices());
+            Session.Instance().SetSelectedTab(index);
+            stashTabControl.SetStashTab(Session.Instance().GetShop().GetStashTab(index), Session.Instance().GetShop().GetPrices());
         }
 
-        private async void ShopFormWin_Closed(object sender, EventArgs e) {
-            if (ShopFormWin.Success) {
-                if (!_session.AnyShops(ShopFormWin.ThreadId)) {
-                    await _session.AddShop(ShopFormWin.ThreadId, ShopFormWin.League);
-                    _session.SetCurrentThreadId(ShopFormWin.ThreadId);
+        private async void HandleShopWinClosed() {
+            await Session.Instance().AddShop(WindowController.Instance().ShopFormWin.ThreadId, WindowController.Instance().ShopFormWin.League, WindowController.Instance().ShopFormWin.GenerateNewThread);
+            Session.Instance().SetCurrentThreadId(WindowController.Instance().ShopFormWin.ThreadId);
 
-                    HamburderMenuItems.Add(HamburgerMenuHeader);
-                    HamburderMenuItems.Add(HamburgerMenuSeparator);
-                    HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
-                    item.Label = _session.GetShop().Title;
-                    item.Glyph = ShopFormWin.ThreadId.ToString();
-                    HamburderMenuItems.Add(item);
-                    hamMenShopThreads.ItemsSource = HamburderMenuItems;
+            HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
+            item.Label = Session.Instance().GetShop().Title;
+            item.Glyph = WindowController.Instance().ShopFormWin.League;
+            AddHamMenuItem(item);
 
-                    _ = InitUI(ShopFormWin.ThreadId, ShopFormWin.League);
-                }
-            } else if (!_session.AnyShops()) {
-                ShopFormWin = new ShopForm();
-                ShopFormWin.Closed += ShopFormWin_Closed;
-                ShopFormWin.SetLeagues(_session.GetLeagues());
-                ShopFormWin.ShowDialog();
-            }
+            _ = InitUI(WindowController.Instance().ShopFormWin.ThreadId, WindowController.Instance().ShopFormWin.League);
         }
 
-        private async Task InitUI(int threadId, string league) {
-            _session.IsLocalStashUpdaterPaused = true;
-
-            txtbThreadId.Text = $"Thread {threadId}";
-            txtbLeague.Text = league;
-
-            await _session.LoadLocalStash();
-
-            stashTabSelectorControl.ClearTabs();
-
-            if (!_session.GetShop().GetStashTabs().Any()) {
-                stashTabControl.ClearStashTab();
-                await _session.UpdateLocalStash(threadId);
-            }
-
-            foreach (var tab in _session.GetShop().GetStashTabsName()) {
-                stashTabSelectorControl.AddTab(tab.Value, tab.Key);
-            }
-
-            if (_session.GetShop().GetStashTabs().Any()) {
-                _session.SetSelectedTab(0);
-                stashTabControl.SetStashTab(_session.GetShop().GetStashTab(0), _session.GetShop().GetPrices());
-                stashTabSelectorControl.SetActiveTab(0);
-            }
-
-            _session.IsLocalStashUpdaterPaused = false;
-
-            loaderStash.IsActive = false;
-        }
-
-        private async void BtnChangeShopThread_Click(object sender, RoutedEventArgs e) {
-            Button btn = (Button)sender;
-            _session.SetCurrentThreadId(Convert.ToInt32(btn.Content.ToString().Substring(7)));
-            await InitUI(_session.CurrentThreadId, _session.GetShop().League.Name);
-        }
-
-        private async void LoginWin_Closed(object sender, EventArgs e) {
-            if (!LoginWin.Success) {
-                System.Windows.Application.Current.Shutdown();
-                return;
-            }
-
-            await _session.SetConnectedPlayer(new Player() {
-                SessionId = LoginWin.POESESSID
-            });
-
-            btnAccount.Content = _session.Player.AccountName;
-
-            _session.RunAutoOnlineUpdater();
-
-            await _session.LoadShops();
-
+        private void SetHamMenuItems(List<HamburgerMenuItemBase> items) {
+            HamburderMenuItems.Clear();
             HamburderMenuItems.Add(HamburgerMenuHeader);
             HamburderMenuItems.Add(HamburgerMenuSeparator);
 
-            foreach (var shop in _session.GetShops()) {
-                HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
-                item.Label = shop.Title;
-                item.Glyph = shop.ThreadId.ToString();
+            foreach (var item in items) {
                 HamburderMenuItems.Add(item);
             }
 
             hamMenShopThreads.ItemsSource = HamburderMenuItems;
-            hamMenShopThreads.SelectedIndex = 0;
+        }
 
-            if (!_session.AnyShops()) {
-                ShopFormWin = new ShopForm();
-                ShopFormWin.Closed += ShopFormWin_Closed;
-                ShopFormWin.SetLeagues(_session.GetLeagues());
-                ShopFormWin.ShowDialog();
-            } else {
-                await InitUI(_session.CurrentThreadId, _session.GetShop().League.Name);
+        private void AddHamMenuItem(HamburgerMenuItemBase item) {
+            HamburderMenuItems.Add(item);
+            hamMenShopThreads.ItemsSource = HamburderMenuItems;
+        }
+
+        private void ShopFormWin_Closed() {
+            if (WindowController.Instance().ShopFormWin.Success) {
+                if (!Session.Instance().AnyShops(WindowController.Instance().ShopFormWin.ThreadId)) {
+                    HandleShopWinClosed();
+                }
+            } else if (!Session.Instance().AnyShops()) {
+                WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
+                WindowController.Instance().ShopFormWin.ShowDialog();
             }
         }
 
-        public BitmapImage ToBitmapImage(System.Drawing.Bitmap bitmap) {
-            using (var memory = new MemoryStream()) {
-                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
-                memory.Position = 0;
+        private async Task InitUI(int threadId, string league) {
+            Session.Instance().IsLocalStashUpdaterPaused = true;
 
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
+            txtbThreadId.Text = $"Shop {threadId}";
+            txtbLeague.Text = league;
 
-                return bitmapImage;
+            await Session.Instance().LoadLocalStash();
+
+            stashTabSelectorControl.ClearTabs();
+
+            if (!Session.Instance().GetShop().GetStashTabs().Any()) {
+                stashTabControl.ClearStashTab();
+                await Session.Instance().UpdateLocalStash(threadId);
+            }
+
+            foreach (var tab in Session.Instance().GetShop().GetStashTabsName()) {
+                stashTabSelectorControl.AddTab(tab.Value, tab.Key);
+            }
+
+            if (Session.Instance().GetShop().GetStashTabs().Any()) {
+                Session.Instance().SetSelectedTab(0);
+                stashTabControl.SetStashTab(Session.Instance().GetShop().GetStashTab(0), Session.Instance().GetShop().GetPrices());
+                stashTabSelectorControl.SetActiveTab(0);
+            }
+
+            Session.Instance().IsLocalStashUpdaterPaused = false;
+
+            loaderStash.IsActive = false;
+        }
+
+        private async Task HandleLogin() {
+            await Session.Instance().SetConnectedPlayer(new Player() {
+                SessionId = WindowController.Instance().LoginWin.POESESSID
+            });
+
+            btnAccount.Content = Session.Instance().Player.AccountName;
+        }
+
+        private void SetHamMenuItemsFromShops() {
+            HamburderMenuItems.Add(HamburgerMenuHeader);
+            HamburderMenuItems.Add(HamburgerMenuSeparator);
+
+            foreach (var shop in Session.Instance().GetShops()) {
+                HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
+                item.Label = shop.Title;
+                item.Glyph = shop.League.Name.ToString();
+                HamburderMenuItems.Add(item);
+            }
+
+            hamMenShopThreads.ItemsSource = HamburderMenuItems;
+        }
+
+        private async void LoginWin_Closed(object sender, EventArgs e) {
+            if (!WindowController.Instance().LoginWin.Success) {
+                System.Windows.Application.Current.Shutdown();
+                return;
+            }
+
+            await HandleLogin();
+
+            Session.Instance().RunAutoOnlineUpdater();
+
+            await Session.Instance().LoadShops();
+
+            SetHamMenuItemsFromShops();
+
+            hamMenShopThreads.SelectedIndex = 0;
+
+            if (!Session.Instance().AnyShops()) {
+                WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
+                WindowController.Instance().ShopFormWin.ShowDialog();
+            } else {
+                await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
             }
         }
 
         private void btnAddShop_Click(object sender, RoutedEventArgs e) {
-            ShopFormWin = new ShopForm();
-            ShopFormWin.Closed += ShopFormWin_Closed;
-            ShopFormWin.SetLeagues(_session.GetLeagues());
-            ShopFormWin.ShowDialog();
+            WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
+            WindowController.Instance().ShopFormWin.ShowDialog();
         }
 
         private void toggleResourceMenu_Click(object sender, RoutedEventArgs e) {
@@ -264,38 +305,58 @@ namespace PoEW.Application {
         private void menItPoETrade_Click(object sender, RoutedEventArgs e) {
             popResourceMenu.IsOpen = false;
 
-            if (webBrowser.Address != Url_PoETrade) {
-                webBrowser.Address = Url_PoETrade;
+            HideBrowsers();
+
+            if (webBrowser_PoETrade.Visibility != Visibility.Visible) {
+                webBrowser_PoETrade.Visibility = Visibility.Visible;
             }
         }
 
         private void menuItPoENinjaBuilds_Click(object sender, RoutedEventArgs e) {
             popResourceMenu.IsOpen = false;
 
-            if (webBrowser.Address != Url_PoENinja_Builds) {
-                webBrowser.Address = Url_PoENinja_Builds;
+            HideBrowsers();
+
+            if (webBrowser_PoENinja_Builds.Visibility != Visibility.Visible) {
+                webBrowser_PoENinja_Builds.Visibility = Visibility.Visible;
             }
         }
 
         private void menuItPoENinjaCurrency_Click(object sender, RoutedEventArgs e) {
             popResourceMenu.IsOpen = false;
 
-            string url = Url_PoENinja_Currency_Template;
+            HideBrowsers();
 
-            if (_session.AnyShops()) {
-                url = url.Replace("$league$", _session.GetShop().League.Name == "Standard" ? "standard" : "challenge");
-            }
+            if (Session.Instance().AnyShops()) {
+                if (Session.Instance().GetShop().League.Name == "Standard") {
+                    if (webBrowser_PoENinja_StandardCurrency.Visibility != Visibility.Visible) {
+                        webBrowser_PoENinja_StandardCurrency.Visibility = Visibility.Visible;
+                    }
+                } else {
+                    if (webBrowser_PoENinja_ChallengeCurrency.Visibility != Visibility.Visible) {
+                        webBrowser_PoENinja_ChallengeCurrency.Visibility = Visibility.Visible;
+                    }
+                }
 
-            if (webBrowser.Address != url) {
-                webBrowser.Address = url;
+            } else {
+                if (webBrowser_PoENinja_ChallengeCurrency.Visibility != Visibility.Visible) {
+                    webBrowser_PoENinja_ChallengeCurrency.Visibility = Visibility.Visible;
+                }
             }
+        }
+
+        private void HideBrowsers() {
+            webBrowser_PoETrade.Visibility = Visibility.Hidden;
+            webBrowser_PoENinja_StandardCurrency.Visibility = Visibility.Hidden;
+            webBrowser_PoENinja_ChallengeCurrency.Visibility = Visibility.Hidden;
+            webBrowser_PoENinja_Builds.Visibility = Visibility.Hidden;
         }
 
         private async void hamMenShopThreads_ItemClick(object sender, ItemClickEventArgs args) {
             HamburgerMenuGlyphItem item = (HamburgerMenuGlyphItem)hamMenShopThreads.SelectedItem;
             int threadId = Convert.ToInt32(item.Glyph);
-            _session.SetCurrentThreadId(threadId);
-            await InitUI(_session.CurrentThreadId, _session.GetShop().League.Name);
+            Session.Instance().SetCurrentThreadId(threadId);
+            await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
         }
     }
 }

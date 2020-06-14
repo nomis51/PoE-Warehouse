@@ -12,6 +12,17 @@ using System.Threading.Tasks;
 
 namespace PoEW.Data {
     public class Session {
+        #region Singleton
+        private static Session _instance;
+        public static Session Instance() {
+            if (_instance == null) {
+                _instance = new Session();
+            }
+
+            return _instance;
+        }
+        #endregion
+
         private Dictionary<int, Shop> ShopThreads = new Dictionary<int, Shop>();
         private Dictionary<string, List<StashTab>> StashTabs = new Dictionary<string, List<StashTab>>();
         public Player Player { get; private set; }
@@ -33,11 +44,20 @@ namespace PoEW.Data {
         public delegate void LocalStashTabsUpdated(Dictionary<int, StashTab> stashTabs);
         public static event LocalStashTabsUpdated OnLocalStashTabsUpdated;
 
-        public Session() {
+        private Session() {
             Shop.OnRequestShopThreadUpdate += Shop_OnRequestShopThreadUpdate;
         }
 
         public Shop GetFirstShop() => AnyShops() ? ShopThreads.Values.FirstOrDefault() : null;
+
+        public async Task<int> CreateShopThread(string league) {
+            if (!string.IsNullOrEmpty(league)) {
+                return await _api.GenerateShopThread(league, Player);
+
+            }
+
+            return -1;
+        }
 
         private async void Shop_OnRequestShopThreadUpdate(Shop shop) {
             await _dataStore.DeleteAll<API.Models.Price>();
@@ -233,8 +253,12 @@ namespace PoEW.Data {
             }
         }
 
-        public async Task AddShop(int threadId, string leagueId) {
+        public async Task AddShop(int threadId, string leagueId, bool generateNewThread = false) {
             if (!ShopThreads.ContainsKey(threadId)) {
+                if (generateNewThread) {
+                    threadId = await CreateShopThread(leagueId);
+                }
+
                 string title = await _api.GetShopThreadTitle(threadId);
 
                 ShopThreads.Add(threadId, new Shop(Leagues[leagueId], threadId, title));
@@ -243,7 +267,7 @@ namespace PoEW.Data {
                     ThreadId = threadId,
                     League = Leagues[leagueId],
                     Title = title
-                }) ;
+                });
             }
         }
 

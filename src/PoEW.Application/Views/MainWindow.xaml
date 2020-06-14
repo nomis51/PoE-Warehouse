@@ -18,11 +18,11 @@
 
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
-            <StackPanel>
+            <StackPanel Margin="0 5 0 0">
                 <ToggleButton x:Name="toggleResourceMenu" Click="toggleResourceMenu_Click">
                     <ToggleButton.Content>
-                        <iconPacks:PackIconModern Width="22"
-                                        Height="22"
+                        <iconPacks:PackIconModern Width="20"
+                                        Height="20"
                                         VerticalAlignment="Center"
                                         Kind="Resource" />
                     </ToggleButton.Content>
@@ -146,20 +146,11 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Glyph}" />
+                    <TextBlock Grid.Column="0" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Glyph}" />
                     <TextBlock Grid.Column="1" Margin="5 0 0 2" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" Text="{Binding Label}" />
                 </Grid>
             </DataTemplate>
         </Grid.Resources>
-
-        <!--<DockPanel Name="dockShopThreadTabs"></DockPanel>-->
-        <!-- <Border BorderBrush="White" BorderThickness="1" Grid.Row="0" Grid.Column="0" >
-            <TextBlock Text="Your Shops" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" FontSize="14"></TextBlock>
-        </Border> -->
-        <!--<Border BorderBrush="White" BorderThickness="1" Grid.Row="1" Grid.Column="0" Grid.RowSpan="3" >
-            <ListView Name="lstvShopThreads" SelectionChanged="lstvShopThreads_SelectionChanged" HorizontalAlignment="Center" VerticalAlignment="Top">
-            </ListView>
-        </Border>-->
 
         <mah:HamburgerMenu 
             Grid.Row="0"
@@ -176,11 +167,8 @@
             <mah:HamburgerMenu.ItemsSource>
                 <mah:HamburgerMenuItemCollection>
                     <mah:HamburgerMenuHeaderItem Label="Shops"></mah:HamburgerMenuHeaderItem>
-                    
-                    <mah:HamburgerMenuSeparatorItem></mah:HamburgerMenuSeparatorItem>
 
-                    <mah:HamburgerMenuGlyphItem Glyph="test" Label="jkasdf">
-                    </mah:HamburgerMenuGlyphItem>
+                    <mah:HamburgerMenuSeparatorItem></mah:HamburgerMenuSeparatorItem>
                 </mah:HamburgerMenuItemCollection>
             </mah:HamburgerMenu.ItemsSource>
 
@@ -197,9 +185,26 @@
         <controls:StashTabSelectorControl x:Name="stashTabSelectorControl" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" ></controls:StashTabSelectorControl>
         <controls:StashTabControl Margin="1" x:Name="stashTabControl" Grid.Row="1" Grid.Column="2"></controls:StashTabControl>
 
-        <wpf:ChromiumWebBrowser x:Name="webBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://www.pathofexile.com/trade"/>
+        <wpf:ChromiumWebBrowser x:Name="webBrowser_PoETrade" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://www.pathofexile.com/trade"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_ChallengeCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/currency"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_StandardCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/standard/currency"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_Builds" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/builds"/>
+
         <mah:ProgressRing Name="loaderWebBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="False"></mah:ProgressRing>
 
         <mah:ProgressRing Name="loaderStash" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True"></mah:ProgressRing>
+
+        <Button Name="btnAddShop" Click="btnAddShop_Click" Panel.ZIndex="10" Margin="5 0 0 5" Width="35" Height="35" ToolTip="Add a new shop" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="99" Grid.RowSpan="99" Style="{DynamicResource MahApps.Styles.Button.Circle}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconFontAwesome Width="22"
+                                        Height="22"
+                                        VerticalAlignment="Center"
+                                        Kind="PlusSolid" />
+                    </StackPanel>
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
     </Grid>
 </mah:MetroWindow>

@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PoEW.API {
@@ -27,10 +28,89 @@ namespace PoEW.API {
         private string BaseUrl_Leagues = "leagues?type=main&compact=1";
         private string Url_OnlineControl = "http://control.poe.trade/";
         private string BaseUrl_ViewThread = "forum/view-thread/$threadId$";
+        private string BaseUrl_Forum = "/forum";
+        private string BaseUrlTemplate_NewThread = "forum/new-thread/$forumId$";
+
+        private Regex RegFindForumShops = new Regex("<a href=\"\\/forum\\/view-forum\\/([0-9]+|((standard|hardcore)-trading-shops))\">(Hardcore )*[a-z]+ (League|Trading) - Shops<\\/a>", RegexOptions.IgnoreCase);
 
         private string PoESessionIdCookieName = "POESESSID";
 
         public PoEAPI() {
+        }
+
+        private async Task<string> GetForumPage() {
+            var uri = new Uri(Url_MainPoEPage);
+            var cookieContainer = new CookieContainer();
+            using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
+            using (var client = new HttpClient(handler) { BaseAddress = uri }) {
+                return await client.GetStringAsync(BaseUrl_Forum);
+            }
+        }
+
+        private string GetForumId(string forumHtml, string league) {
+            var matches = RegFindForumShops.Matches(forumHtml);
+
+            foreach (Match match in matches) {
+                if (match.Success) {
+                    string forumPath = Utils.FindTextBetween(match.Value, "<a href=\"", "\">");
+                    string forumLeague = Utils.FindTextBetween(match.Value, "\">", " - Shops</a>");
+                    forumLeague = forumLeague.Replace(" Trading", "").Replace(" League", "");
+
+                    if (forumLeague == league) {
+                        return forumPath.Substring(forumPath.LastIndexOf("/") + 1);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private async Task<string> GetNewThreadPage(string forumId, string sessionId) {
+            var uri = new Uri(Url_MainPoEPage);
+            var cookieContainer = new CookieContainer();
+            using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
+            using (var client = new HttpClient(handler) { BaseAddress = uri }) {
+                cookieContainer.Add(uri, new Cookie(PoESessionIdCookieName, sessionId));
+                return await client.GetStringAsync(BaseUrlTemplate_NewThread.Replace("$forumId$", forumId));
+            }
+        }
+
+        public async Task<int> GenerateShopThread(string league, Player player) {
+            string html = await GetForumPage();
+            string forumId = GetForumId(html, league);
+
+            if (!string.IsNullOrEmpty(forumId)) {
+                var newThreadPage = await GetNewThreadPage(forumId, player.SessionId);
+
+                string csrfToken = Utils.GetCsrfToken(newThreadPage, "hash");
+
+                UrlQuery data = new UrlQuery();
+                data.Add("hash", csrfToken);
+                data.Add("title", $"{player.AccountName}'s {league} Shop");
+                data.Add("content", "reserved");
+                data.Add("submit", "Submit");
+
+                var uri = new Uri(Url_MainPoEPage);
+                var cookieContainer = new CookieContainer();
+                using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
+                using (var client = new HttpClient(handler) { BaseAddress = uri }) {
+                    cookieContainer.Add(uri, new Cookie(PoESessionIdCookieName, player.SessionId));
+                    var baseUrl = BaseUrlTemplate_NewThread.Replace("$forumId$", forumId);
+                    try {
+                        var response = await client.PostAsync(baseUrl, new StringContent(data.Build(), Encoding.UTF8, "application/x-www-form-urlencoded"));
+
+                        if (response.IsSuccessStatusCode) {
+                            return Convert.ToInt32(response.RequestMessage.RequestUri.Segments.Last());
+                        }
+                    } catch (HttpRequestException e) {
+                        // TODO: log exception
+
+                        return -1;
+                    }
+                }
+            }
+
+            return -1;
         }
 
         public async Task<string> GetShopThreadTitle(int threadId) {

@@ -23,6 +23,7 @@ namespace PoEW.Application.Views {
         private ObservableCollection<string> leagues = new ObservableCollection<string>();
         public int ThreadId;
         public string League;
+        public bool GenerateNewThread = true;
         private Regex regThreadUrl = new Regex("https://www.pathofexile.com/forum/view-thread/[0-9]+");
 
         public bool Success { get; private set; } = false;
@@ -40,11 +41,16 @@ namespace PoEW.Application.Views {
         }
 
         private bool ParseThreadId() {
+            if (GenerateNewThread) {
+                return true;
+            }
+
             if (!string.IsNullOrEmpty(txtThreadId.Text)) {
                 int threadId = -1;
 
                 if (regThreadUrl.IsMatch(txtThreadId.Text)) {
                     string strThreadId = txtThreadId.Text.Substring(txtThreadId.Text.IndexOf("view-thread/") + 12);
+
                     if (!int.TryParse(strThreadId, out threadId)) {
                         return false;
                     }
@@ -62,7 +68,7 @@ namespace PoEW.Application.Views {
         }
 
         private bool ParseLeague() {
-            if (!string.IsNullOrEmpty(cboLeagues.SelectedValue.ToString())) {
+            if (cboLeagues.SelectedValue != null) {
                 League = cboLeagues.SelectedValue.ToString();
                 return true;
             }
@@ -75,6 +81,22 @@ namespace PoEW.Application.Views {
                 Success = true;
                 Close();
             }
+        }
+
+        private void chkAutoGenThread_Checked(object sender, RoutedEventArgs e) {
+            bool state = chkAutoGenThread.IsChecked == true;
+            DisableThreadIdField(state);
+            GenerateNewThread = state;
+        }
+
+        private void DisableThreadIdField(bool disable = true) {
+            if (txtThreadId != null) {
+                txtThreadId.IsReadOnly = disable;
+            }
+        }
+
+        private void chkAutoGenThread_Unchecked(object sender, RoutedEventArgs e) {
+
         }
     }
 }

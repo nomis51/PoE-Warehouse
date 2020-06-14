@@ -281,9 +281,7 @@
       <DependentUpon>SteamLoginControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CookieCollector.cs" />
-    <Compile Include="Views\ItemTooltip.xaml.cs">
-      <DependentUpon>ItemTooltip.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Utils.cs" />
     <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -296,9 +294,10 @@
     <Compile Include="Views\ShopForm.xaml.cs">
       <DependentUpon>ShopForm.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\WebBrowser.xaml.cs">
-      <DependentUpon>WebBrowser.xaml</DependentUpon>
+    <Compile Include="Views\LoginWebBrowser.xaml.cs">
+      <DependentUpon>LoginWebBrowser.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WindowController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -356,10 +355,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ItemTooltip.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\LoginWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -376,7 +371,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\WebBrowser.xaml">
+    <Page Include="Views\LoginWebBrowser.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

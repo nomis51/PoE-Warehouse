@@ -50,17 +50,13 @@ namespace PoEW.Data {
 
         public Shop GetFirstShop() => AnyShops() ? ShopThreads.Values.FirstOrDefault() : null;
 
-        public async Task<bool> CreateShopThread(string league) {
+        public async Task<int> CreateShopThread(string league) {
             if (!string.IsNullOrEmpty(league)) {
-                int threadId = await _api.GenerateShopThread(league, Player);
+                return await _api.GenerateShopThread(league, Player);
 
-                if (threadId != -1) {
-                    await AddShop(threadId, league);
-                    return true;
-                }
             }
 
-            return false;
+            return -1;
         }
 
         private async void Shop_OnRequestShopThreadUpdate(Shop shop) {
@@ -257,8 +253,12 @@ namespace PoEW.Data {
             }
         }
 
-        public async Task AddShop(int threadId, string leagueId) {
+        public async Task AddShop(int threadId, string leagueId, bool generateNewThread = false) {
             if (!ShopThreads.ContainsKey(threadId)) {
+                if (generateNewThread) {
+                    threadId = await CreateShopThread(leagueId);
+                }
+
                 string title = await _api.GetShopThreadTitle(threadId);
 
                 ShopThreads.Add(threadId, new Shop(Leagues[leagueId], threadId, title));

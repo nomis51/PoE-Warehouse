@@ -80,7 +80,7 @@ namespace PoEW.Application {
 
         private void SetupEvents() {
             WindowController.Instance().LoginWin.Closed += LoginWin_Closed;
-            WindowController.Instance().ShopFormWin.Closed += ShopFormWin_Closed;
+            WindowController.Instance().ShopFormWin.IsVisibleChanged += ShopFormWin_IsVisibleChanged; ;
             stashTabSelectorControl.OnStashTabSelected += StashTabSelectorControl_OnStashTabSelected;
             Session.OnLocalStashTabsUpdated += Session_OnLocalStashTabsUpdated;
             webBrowser_PoENinja_Builds.FrameLoadEnd += WebBrowser_FrameLoadEnd;
@@ -92,6 +92,12 @@ namespace PoEW.Application {
             webBrowser_PoETrade.FrameLoadEnd += WebBrowser_FrameLoadEnd;
             webBrowser_PoETrade.FrameLoadStart += WebBrowser_FrameLoadStart;
             webBrowser_PoETrade.IsBrowserInitializedChanged += WebBrowser_PoETrade_IsBrowserInitializedChanged; ;
+        }
+
+        private void ShopFormWin_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+          if(WindowController.Instance().ShopFormWin.Visibility == Visibility.Hidden) {
+                ShopFormWin_Closed();
+            }
         }
 
         private void WebBrowser_PoETrade_IsBrowserInitializedChanged(object sender, DependencyPropertyChangedEventArgs e) {
@@ -168,7 +174,7 @@ namespace PoEW.Application {
         }
 
         private async void HandleShopWinClosed() {
-            await Session.Instance().AddShop(WindowController.Instance().ShopFormWin.ThreadId, WindowController.Instance().ShopFormWin.League);
+            await Session.Instance().AddShop(WindowController.Instance().ShopFormWin.ThreadId, WindowController.Instance().ShopFormWin.League, WindowController.Instance().ShopFormWin.GenerateNewThread);
             Session.Instance().SetCurrentThreadId(WindowController.Instance().ShopFormWin.ThreadId);
 
             HamburgerMenuGlyphItem item = new HamburgerMenuGlyphItem();
@@ -196,7 +202,7 @@ namespace PoEW.Application {
             hamMenShopThreads.ItemsSource = HamburderMenuItems;
         }
 
-        private void ShopFormWin_Closed(object sender, EventArgs e) {
+        private void ShopFormWin_Closed() {
             if (WindowController.Instance().ShopFormWin.Success) {
                 if (!Session.Instance().AnyShops(WindowController.Instance().ShopFormWin.ThreadId)) {
                     HandleShopWinClosed();

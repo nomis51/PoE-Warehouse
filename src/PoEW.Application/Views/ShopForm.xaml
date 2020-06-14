@@ -15,16 +15,29 @@
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="10"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions></Grid.ColumnDefinitions>
+        
+        <DockPanel Grid.Row="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
 
-        <TextBox Name="txtThreadId" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0" Grid.Column="0" mah:TextBoxHelper.Watermark="Thread ID or Thread URL"></TextBox>
-        <Label Name="lblHowToFindThreadID" HorizontalAlignment="Left" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0"  Foreground="DeepSkyBlue" Cursor="Hand">
+                <CheckBox x:Name="chkAutoGenThread" IsChecked="True" Checked="chkAutoGenThread_Checked" Unchecked="chkAutoGenThread_Checked" Content="Auto generate forum thread" Margin="5 0 0 0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" ></CheckBox>
+                <TextBlock Text="Automatically generate a new forum thread" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
+            </Grid>
+        </DockPanel>
+        
+        <TextBox Name="txtThreadId" IsReadOnly="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0" mah:TextBoxHelper.Watermark="Thread ID or Thread URL"></TextBox>
+        <Label Name="lblHowToFindThreadID" HorizontalAlignment="Left" VerticalAlignment="Stretch" Grid.Row="2" Grid.Column="0"  Foreground="DeepSkyBlue" Cursor="Hand">
             <TextBlock TextDecorations="Underline">How to find my Thread ID or Thread URL?</TextBlock>
         </Label>
-        <ComboBox Name="cboLeagues" SelectedIndex="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2" Grid.Column="0" mah:TextBoxHelper.Watermark="Leagues"></ComboBox>
-        <Button x:Name="btnSetShop" HorizontalAlignment="Right" MinWidth="80" VerticalAlignment="Stretch" Click="btnSetShop_Click" Content="Save" Grid.Row="4" Grid.Column="0"></Button>
+        <ComboBox Name="cboLeagues" SelectedIndex="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="0" mah:TextBoxHelper.Watermark="Leagues"></ComboBox>
+        <Button x:Name="btnSetShop" HorizontalAlignment="Right" MinWidth="80" VerticalAlignment="Stretch" Click="btnSetShop_Click" Content="Save" Grid.Row="5" Grid.Column="0"></Button>
     </Grid>
 </mah:MetroWindow>

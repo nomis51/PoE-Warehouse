@@ -301,6 +301,10 @@ namespace PoEW.Data {
             return null;
         }
 
+        public Shop GetShop(string league) {
+            return ShopThreads.Values.FirstOrDefault(s => s.League.Name == league);
+        }
+
         public Shop GetShop() {
             if (ShopThreads.ContainsKey(CurrentThreadId)) {
                 return ShopThreads[CurrentThreadId];

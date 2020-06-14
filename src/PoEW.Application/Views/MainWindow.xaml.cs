@@ -37,7 +37,7 @@ namespace PoEW.Application {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : MetroWindow {
-        private const string Url_PoETrade = "https://www.pathofexile.com/trade";
+        private const string Url_PoETrade = "https://www.pathofexile.com/trade/search/$league$";
         private const string Url_PlayerAccount = "https://www.pathofexile.com/my-account";
         private Regex regPoENinjaUrl = new Regex("https://poe.ninja/[a-z]+/(builds|currency)");
         private string LastUrlLoaded = "";
@@ -73,7 +73,7 @@ namespace PoEW.Application {
             Cookie cookie = new Cookie();
             cookie.Name = "POESESSID";
             cookie.Value = Session.Instance().Player.SessionId;
-            await cookieManager.SetCookieAsync(Url_PoETrade, cookie);
+            await cookieManager.SetCookieAsync(Url_PoETrade.Replace("/search/$league$", ""), cookie);
             await cookieManager.SetCookieAsync(Url_PlayerAccount, cookie);
         }
 
@@ -289,6 +289,7 @@ namespace PoEW.Application {
                 WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetAvailableLeagues());
                 WindowController.Instance().ShopFormWin.ShowDialog();
             } else {
+                webBrowser_PoETrade.Address = Url_PoETrade.Replace("$league$", Session.Instance().GetShop().League.Name);
                 await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
             }
         }
@@ -310,6 +311,12 @@ namespace PoEW.Application {
             popResourceMenu.IsOpen = false;
 
             HideBrowsers();
+
+            string url = Url_PoETrade.Replace("$league$", Session.Instance().GetShop().League.Name);
+
+            if (webBrowser_PoETrade.Address != url) {
+                webBrowser_PoETrade.Address = url;
+            }
 
             if (webBrowser_PoETrade.Visibility != Visibility.Visible) {
                 webBrowser_PoETrade.Visibility = Visibility.Visible;
@@ -359,8 +366,9 @@ namespace PoEW.Application {
 
         private async void hamMenShopThreads_ItemClick(object sender, ItemClickEventArgs args) {
             HamburgerMenuGlyphItem item = (HamburgerMenuGlyphItem)hamMenShopThreads.SelectedItem;
-            int threadId = Convert.ToInt32(item.Glyph);
-            Session.Instance().SetCurrentThreadId(threadId);
+            string league = item.Glyph;
+            var shop = Session.Instance().GetShop(league);
+            Session.Instance().SetCurrentThreadId(shop.ThreadId);
             await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
         }
 

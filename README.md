@@ -1,23 +1,23 @@
 # PoE-Warehouse
-It's a multi-functionality trade manager. Greatly inspired by the Acquisition project, but with many additional features and improvements.
+It's a heavily featured trade and stash manager application. Greatly inspired by the [Acquisistion](https://github.com/xyzz/acquisition) project, but with a much more intuitive interface and many additional features.
 
 ## Requirements
 - .NET Framework 4.5
 - Visual C++ 2012
 
 # Features
-## Core Features
 - Virtual Stash
 - Auto-Online 
-
-## Additional Features
-- Expiration date and notification
-- Show/Hide items price on trading websites
-- Price checking and notifications
+- Automatically update forum thread while needed
+- Automatically fetch stash when needed
+- Automatically create new thread
+- Integrate poe.ninja Currency and Builds with automatic league selection
+- Integrate www.pathofexile.com/trade with automatic league selection and auto-login
 
 ## TODO
-- Support multi-user
-- Expiration date and notification
-- Show/Hide items on trading websites
-- Price checking and notifications
-- Make the UI better
+- Price expiration date and notification when it expires
+- Show/Hide items on trading websites on demand
+- Price checking and notifications if price might be wrong
+- Price a whole tab (can currently price items one-by-one)
+- Multi-user support
+- Automatic league selection on www.pathofexile.com/trade

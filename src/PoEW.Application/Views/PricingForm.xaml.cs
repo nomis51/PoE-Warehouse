@@ -23,13 +23,20 @@ namespace PoEW.Application.Views {
         private string Url_Chaos = "https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyRerollRare.png?w=1&h=1&scale=1&v=c60aa876dd6bab31174df91b1da1b4f9";
         private string Url_Exalt = "https://web.poecdn.com/image/Art/2DItems/Currency/CurrencyAddModToRare.png?w=1&h=1&scale=1&v=1745ebafbd533b6f91bccf588ab5efc5";
 
-        private string ItemId;
-        public Price Price;
+        public Price Price = null;
+        public string ItemId { get; private set; }
+        private bool IsPriceActive = true;
 
         public bool Success { get; private set; } = false;
 
         public PricingForm() {
             InitializeComponent();
+
+            this.Loaded += PricingForm_Loaded;
+        }
+
+        private void PricingForm_Loaded(object sender, RoutedEventArgs e) {
+            Init();
         }
 
         public void SetItemId(string itemId) {
@@ -56,7 +63,6 @@ namespace PoEW.Application.Views {
         }
 
         private void UnsetPrice() {
-            Price = null;
             Session.Instance().GetShop().UnsetPrice(ItemId);
             Success = true;
             Close();
@@ -70,7 +76,8 @@ namespace PoEW.Application.Views {
             int price = -1;
 
             if ((price = ValidatePrice()) != -1) {
-                Session.Instance().GetShop().SetPrice(ItemId, Price);
+                Price = new Price(Shop.StringToCurrencyType[cboCurrencies.SelectedValue.ToString()], Shop.PrefixToPriceType[cboTypes.SelectedValue.ToString()], price);
+                Session.Instance().GetShop().SetPrice(ItemId, Price, IsPriceActive);
 
                 Success = true;
                 Close();
@@ -84,6 +91,11 @@ namespace PoEW.Application.Views {
             }
 
             return -1;
+        }
+
+        private void btnShowHidePrice_Click(object sender, RoutedEventArgs e) {
+            IsPriceActive = !IsPriceActive;
+            btnShowHidePrice.Content = IsPriceActive ? "Hide" : "Show";
         }
     }
 }

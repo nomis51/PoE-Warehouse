@@ -54,6 +54,9 @@
             </Button.ContentTemplate>
         </Button>
 
+        <Button x:Name="btnShowHidePrice" Content="Hide" Grid.Row="3" Grid.Column="1" Margin="5 0 0 0" Grid.ColumnSpan="3" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="btnShowHidePrice_Click">
+        </Button>
+
         <Image Name="imgAlc" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"></Image>
         <Image Name="imgChaos" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"></Image>
         <Image Name="imgExalt" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"></Image>

@@ -171,7 +171,7 @@ namespace PoEW.Data {
             ShopThreads[CurrentThreadId].ClearPrices();
 
             foreach (var price in prices) {
-                ShopThreads[CurrentThreadId].SetPrice(price.ItemId, price.Value);
+                ShopThreads[CurrentThreadId].SetPrice(price.ItemId, price.Value, true);
             }
 
             if (!IsLocalStashUpdaterStarted) {

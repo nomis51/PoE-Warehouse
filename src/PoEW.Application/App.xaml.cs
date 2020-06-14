@@ -1,5 +1,6 @@
 ﻿using CefSharp;
 using CefSharp.Wpf;
+using PoEW.API.Logging;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -17,6 +18,9 @@ namespace PoEW.Application {
     /// </summary>
     public partial class App : System.Windows.Application {
         public App() {
+            MessageController.Instance().Log("");
+            MessageController.Instance().Log("Starting PoE Warehouse...");
+
             AppDomain.CurrentDomain.AssemblyResolve += Resolver;
 
             InitializeCefSharp();

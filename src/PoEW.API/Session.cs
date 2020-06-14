@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Internal;
 using PoEW.API;
+using PoEW.API.Logging;
 using PoEW.API.Models;
 using PoEW.Data.Abstractions;
 using PoEW.Data.Models;
@@ -79,6 +80,7 @@ namespace PoEW.Data {
 
         public void RunAutoOnlineUpdater() {
             Task.Run(async () => {
+                MessageController.Instance().Log("Auto online started.");
                 while (true) {
                     await _api.RefreshOnlineStatus(Player);
 
@@ -90,11 +92,14 @@ namespace PoEW.Data {
 
         public void RunLocalStashUpdater() {
             Task.Run(async () => {
+                MessageController.Instance().Log("Local Stash Updater started.");
                 while (true) {
                     int threadId = CurrentThreadId;
+
                     await UpdateLocalStash(threadId);
 
                     if (!IsLocalStashUpdaterPaused && GetShop(threadId).League.Name == GetShop(CurrentThreadId).League.Name) {
+                        MessageController.Instance().Log($"{GetShop(threadId).League.Name} local stash updated.");
                         OnLocalStashTabsUpdated(ShopThreads[threadId].GetStashTabs());
                     }
 
@@ -114,8 +119,12 @@ namespace PoEW.Data {
         }
 
         public async Task UpdateLocalStash(int threadId) {
+            MessageController.Instance().Log($"Updating {GetShop(threadId).League.Name} local stash...");
+
             var stashTabs = await _api.UpdateLocalStash(Player, ShopThreads[threadId].League);
             stashTabs = stashTabs.OrderBy(t => t.Index).ToList();
+
+            MessageController.Instance().Log($"{stashTabs.Count} {GetShop(threadId).League.Name} stash tab{(stashTabs.Count > 1 ? "s" : "")} received.");
 
             if (StashTabs.ContainsKey(ShopThreads[threadId].League.Name)) {
                 StashTabs[ShopThreads[threadId].League.Name] = stashTabs;
@@ -137,10 +146,15 @@ namespace PoEW.Data {
         }
 
         public async Task LoadLocalStash() {
+            MessageController.Instance().Log("Loading local stash tabs...");
             var stashTabs = await _dataStore.Get<StashTab>(t => t.League == ShopThreads[CurrentThreadId].League.Name, new string[] { "Items" });
             stashTabs = stashTabs.OrderBy(t => t.Index).ToList();
+            MessageController.Instance().Log($"{stashTabs.Count} local stash tab{(stashTabs.Count > 1 ? "s" : "")} loaded.");
 
+
+            MessageController.Instance().Log("Loading prices...");
             var prices = await _dataStore.Get<API.Models.Price>(p => p.ThreadId == CurrentThreadId);
+            MessageController.Instance().Log($"{prices.Count} price{(prices.Count > 1 ? "s" : "")} loaded.");
 
             if (StashTabs.ContainsKey(ShopThreads[CurrentThreadId].League.Name)) {
                 StashTabs[ShopThreads[CurrentThreadId].League.Name] = stashTabs;
@@ -247,14 +261,17 @@ namespace PoEW.Data {
         public List<Shop> GetShops() => ShopThreads.Values.ToList();
 
         public async Task LoadShops() {
+            MessageController.Instance().Log("Loading shops...");
             var shops = await _dataStore.Get<ShopThread>();
 
             foreach (var shop in shops) {
                 ShopThreads.Add(shop.ThreadId, new Shop(shop.League, shop.ThreadId, shop.Title));
+                MessageController.Instance().Log($"Shop {shop.Title} of {shop.League.Name} league loaded.");
             }
 
             if (CurrentThreadId == 0 && AnyShops()) {
                 CurrentThreadId = ShopThreads.Keys.FirstOrDefault();
+                MessageController.Instance().Log($"Shop {GetShop().Title} of {GetShop().League.Name} league selected.");
             }
         }
 

@@ -29,6 +29,7 @@ using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
 using CefSharp.Wpf;
 using CefSharp;
+using PoEW.API.Logging;
 
 namespace PoEW.Application {
     /// <summary>
@@ -48,13 +49,15 @@ namespace PoEW.Application {
 
         public MainWindow() {
             InitializeComponent();
-
             Init();
 
             WindowController.Instance().LoginWin.ShowDialog();
         }
 
         private void Init() {
+            MessageController.Instance().AddLogger(new FileLogger());
+            MessageController.Instance().AddLogger(new ConsoleLogger(console));
+
             LoadingUrl = Url_PoETrade;
 
             var lastPlayer = Session.Instance().GetLastPlayer().Result;
@@ -95,11 +98,11 @@ namespace PoEW.Application {
         }
 
         private void ShopFormWin_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-          if(WindowController.Instance().ShopFormWin.Visibility == Visibility.Hidden) {
+            if (WindowController.Instance().ShopFormWin.Visibility == Visibility.Hidden) {
                 ShopFormWin_Closed();
             }
         }
-        
+
         private void WebBrowser_PoETrade_IsBrowserInitializedChanged(object sender, DependencyPropertyChangedEventArgs e) {
             _ = SetPoETradeBrowserCookie();
         }
@@ -244,10 +247,12 @@ namespace PoEW.Application {
         }
 
         private async Task HandleLogin() {
+            MessageController.Instance().Log("Authenticating...");
             await Session.Instance().SetConnectedPlayer(new Player() {
                 SessionId = WindowController.Instance().LoginWin.POESESSID
             });
 
+            MessageController.Instance().Log($"{Session.Instance().Player.AccountName} authenticated.");
             btnAccount.Content = Session.Instance().Player.AccountName;
         }
 
@@ -282,6 +287,7 @@ namespace PoEW.Application {
             hamMenShopThreads.SelectedIndex = 0;
 
             if (!Session.Instance().AnyShops()) {
+                MessageController.Instance().Log("No shop available, please create one to proceed.");
                 WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetAvailableLeagues());
                 WindowController.Instance().ShopFormWin.ShowDialog();
             } else {
@@ -357,6 +363,24 @@ namespace PoEW.Application {
             int threadId = Convert.ToInt32(item.Glyph);
             Session.Instance().SetCurrentThreadId(threadId);
             await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
+        }
+
+        private void SetBrowsersHeight(bool collapsed = true) {
+            webBrowser_PoENinja_Builds.SetValue(Grid.RowSpanProperty, collapsed ? 2 : 3);
+            webBrowser_PoENinja_ChallengeCurrency.SetValue(Grid.RowSpanProperty, collapsed ? 2 : 3);
+            webBrowser_PoENinja_StandardCurrency.SetValue(Grid.RowSpanProperty, collapsed ? 2 : 3);
+            webBrowser_PoETrade.SetValue(Grid.RowSpanProperty, collapsed ? 2 : 3);
+
+        }
+
+        private void btnShowHideConsole_Click(object sender, RoutedEventArgs e) {
+            bool isVisible = console.Visibility == Visibility.Visible;
+            console.Visibility = isVisible ? Visibility.Hidden : Visibility.Visible;
+
+            btnShowHideConsole.HorizontalAlignment = isVisible ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+            btnShowHideConsole.Margin = isVisible ? new Thickness(0, 0, 0, 5) : new Thickness(0, 0, 20, 5);
+
+            SetBrowsersHeight(!isVisible);
         }
     }
 }

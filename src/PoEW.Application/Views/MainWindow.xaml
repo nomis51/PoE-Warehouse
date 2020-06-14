@@ -162,6 +162,7 @@
             ItemTemplate="{StaticResource MenuItemTemplate}"
             OptionsItemTemplate="{StaticResource MenuItemTemplate}"
             ItemClick="hamMenShopThreads_ItemClick"
+            SelectedIndex="0"
             DisplayMode="CompactOverlay">
             <!--  Items  -->
             <mah:HamburgerMenu.ItemsSource>

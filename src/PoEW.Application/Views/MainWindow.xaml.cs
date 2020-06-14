@@ -38,6 +38,7 @@ namespace PoEW.Application {
     /// </summary>
     public partial class MainWindow : MetroWindow {
         private const string Url_PoETrade = "https://www.pathofexile.com/trade/search/$league$";
+        private const string Url_PoENinja_Currency = "https://poe.ninja/$league$/currency";
         private const string Url_PlayerAccount = "https://www.pathofexile.com/my-account";
         private Regex regPoENinjaUrl = new Regex("https://poe.ninja/[a-z]+/(builds|currency)");
         private string LastUrlLoaded = "";
@@ -254,6 +255,10 @@ namespace PoEW.Application {
             btnAccount.Content = Session.Instance().Player.AccountName;
         }
 
+        private void SetActiveHamMenuItem(int index) {
+            hamMenShopThreads.SelectedOptionsIndex = index;
+        }
+
         private void SetHamMenuItemsFromShops() {
             HamburderMenuItems.Add(HamburgerMenuHeader);
             HamburderMenuItems.Add(HamburgerMenuSeparator);
@@ -282,13 +287,12 @@ namespace PoEW.Application {
 
             SetHamMenuItemsFromShops();
 
-            hamMenShopThreads.SelectedIndex = 0;
-
             if (!Session.Instance().AnyShops()) {
                 MessageController.Instance().Log("No shop available, please create one to proceed.");
                 WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetAvailableLeagues());
                 WindowController.Instance().ShopFormWin.ShowDialog();
             } else {
+                SetActiveHamMenuItem(0);
                 webBrowser_PoETrade.Address = Url_PoETrade.Replace("$league$", Session.Instance().GetShop().League.Name);
                 await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
             }
@@ -370,6 +374,24 @@ namespace PoEW.Application {
             var shop = Session.Instance().GetShop(league);
             Session.Instance().SetCurrentThreadId(shop.ThreadId);
             await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
+            AdjustLeagueInBrowsers();
+        }
+
+        private void AdjustLeagueInBrowsers() {
+            string currentLeague = Session.Instance().GetShop().League.Name;
+            string poeTradeUrl = Url_PoETrade.Replace("$league$", currentLeague);
+
+            if (webBrowser_PoETrade.Address != poeTradeUrl) {
+                webBrowser_PoETrade.Address = poeTradeUrl;
+            }
+
+            if (webBrowser_PoENinja_ChallengeCurrency.Visibility == Visibility.Visible && (currentLeague == "Standard" || currentLeague == "Hardcore")) {
+                webBrowser_PoENinja_ChallengeCurrency.Visibility = Visibility.Hidden;
+                webBrowser_PoENinja_StandardCurrency.Visibility = Visibility.Visible;
+            } else if (webBrowser_PoENinja_StandardCurrency.Visibility == Visibility.Visible && currentLeague != "Standard" && currentLeague != "Hardcore") {
+                webBrowser_PoENinja_ChallengeCurrency.Visibility = Visibility.Visible;
+                webBrowser_PoENinja_StandardCurrency.Visibility = Visibility.Hidden;
+            }
         }
 
         private void SetBrowsersHeight(bool collapsed = true) {

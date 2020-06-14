@@ -152,15 +152,6 @@
             </DataTemplate>
         </Grid.Resources>
 
-        <!--<DockPanel Name="dockShopThreadTabs"></DockPanel>-->
-        <!-- <Border BorderBrush="White" BorderThickness="1" Grid.Row="0" Grid.Column="0" >
-            <TextBlock Text="Your Shops" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" FontSize="14"></TextBlock>
-        </Border> -->
-        <!--<Border BorderBrush="White" BorderThickness="1" Grid.Row="1" Grid.Column="0" Grid.RowSpan="3" >
-            <ListView Name="lstvShopThreads" SelectionChanged="lstvShopThreads_SelectionChanged" HorizontalAlignment="Center" VerticalAlignment="Top">
-            </ListView>
-        </Border>-->
-
         <mah:HamburgerMenu 
             Grid.Row="0"
             Grid.RowSpan="3"
@@ -202,5 +193,18 @@
         <mah:ProgressRing Name="loaderWebBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="False"></mah:ProgressRing>
 
         <mah:ProgressRing Name="loaderStash" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True"></mah:ProgressRing>
+
+        <Button Name="btnAddShop" Click="btnAddShop_Click" Panel.ZIndex="10" Margin="5 0 0 5" Width="35" Height="35" ToolTip="Add a new shop" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="99" Grid.RowSpan="99" Style="{DynamicResource MahApps.Styles.Button.Circle}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconFontAwesome Width="22"
+                                        Height="22"
+                                        VerticalAlignment="Center"
+                                        Kind="PlusSolid" />
+                    </StackPanel>
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
     </Grid>
 </mah:MetroWindow>

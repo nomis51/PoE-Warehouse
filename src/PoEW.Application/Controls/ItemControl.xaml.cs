@@ -45,10 +45,17 @@ namespace PoEW.Application.Controls {
             SetStackSize();
             SetSockets();
             SetItemBackground();
+            SetupEvents();
         }
 
         private void SetupEvents() {
-            WindowController.Instance().PricingFormWin.Closed += PricingForm_Closed;
+            WindowController.Instance().PricingFormWin.IsVisibleChanged += PricingFormWin_IsVisibleChanged;
+        }
+
+        private void PricingFormWin_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+          if(WindowController.Instance().PricingFormWin.Visibility == Visibility.Hidden) {
+                PricingForm_Closed();
+            }
         }
 
         private void SetItemBackground() {
@@ -247,7 +254,7 @@ namespace PoEW.Application.Controls {
             WindowController.Instance().PricingFormWin.ShowDialog();
         }
 
-        private void PricingForm_Closed(object sender, EventArgs e) {
+        private void PricingForm_Closed() {
             EditPriceNote();
         }
 

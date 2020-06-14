@@ -31,9 +31,8 @@ namespace PoEW.API.Logging {
             LogTask = new Task(() => {
                 while (true) {
                     foreach (var logger in Loggers) {
-                        try {
+                        while (logger.Value.Count > 0) {
                             logger.Key.Log(logger.Value.Dequeue());
-                        } catch (InvalidOperationException e) {
                         }
                     }
 

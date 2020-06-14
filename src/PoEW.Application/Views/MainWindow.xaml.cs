@@ -99,7 +99,7 @@ namespace PoEW.Application {
                 ShopFormWin_Closed();
             }
         }
-
+        
         private void WebBrowser_PoETrade_IsBrowserInitializedChanged(object sender, DependencyPropertyChangedEventArgs e) {
             _ = SetPoETradeBrowserCookie();
         }
@@ -208,7 +208,7 @@ namespace PoEW.Application {
                     HandleShopWinClosed();
                 }
             } else if (!Session.Instance().AnyShops()) {
-                WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
+                WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetAvailableLeagues());
                 WindowController.Instance().ShopFormWin.ShowDialog();
             }
         }
@@ -282,7 +282,7 @@ namespace PoEW.Application {
             hamMenShopThreads.SelectedIndex = 0;
 
             if (!Session.Instance().AnyShops()) {
-                WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
+                WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetAvailableLeagues());
                 WindowController.Instance().ShopFormWin.ShowDialog();
             } else {
                 await InitUI(Session.Instance().CurrentThreadId, Session.Instance().GetShop().League.Name);
@@ -290,7 +290,7 @@ namespace PoEW.Application {
         }
 
         private void btnAddShop_Click(object sender, RoutedEventArgs e) {
-            WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetLeagues());
+            WindowController.Instance().ShopFormWin.SetLeagues(Session.Instance().GetAvailableLeagues());
             WindowController.Instance().ShopFormWin.ShowDialog();
         }
 

@@ -172,6 +172,11 @@ namespace PoEW.Data {
             //}
         }
 
+        public List<League> GetAvailableLeagues() {
+            var usedLeagues = ShopThreads.Values.Select(s => s.League.Name);
+            return Leagues.Values.ToList().FindAll(l => usedLeagues.IndexOf(l.Name) == -1);
+        }
+
         public List<League> GetLeagues() => Leagues.Select(l => l.Value).ToList();
 
         public League GetLeague(string id) {

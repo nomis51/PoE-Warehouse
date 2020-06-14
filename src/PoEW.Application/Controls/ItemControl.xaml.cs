@@ -53,7 +53,7 @@ namespace PoEW.Application.Controls {
         }
 
         private void PricingFormWin_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-          if(WindowController.Instance().PricingFormWin.Visibility == Visibility.Hidden) {
+            if (WindowController.Instance().PricingFormWin.Visibility == Visibility.Hidden) {
                 PricingForm_Closed();
             }
         }
@@ -251,11 +251,14 @@ namespace PoEW.Application.Controls {
         }
 
         private void imgIconUrl_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
+            WindowController.Instance().PricingFormWin.SetItemId(Item.Id);
             WindowController.Instance().PricingFormWin.ShowDialog();
         }
 
         private void PricingForm_Closed() {
-            EditPriceNote();
+            if (WindowController.Instance().PricingFormWin.ItemId == Item.Id) {
+                EditPriceNote();
+            }
         }
 
         private void EditPriceNote() {

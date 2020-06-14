@@ -30,18 +30,17 @@ using System.Collections.ObjectModel;
 using CefSharp.Wpf;
 using CefSharp;
 using PoEW.API.Logging;
+using System.Security.Policy;
 
 namespace PoEW.Application {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : MetroWindow {
-        private string Url_PoETrade = "https://www.pathofexile.com/trade";
-        private string Url_PoENinja_Currency_Template = "https://poe.ninja/$league$/currency";
-        private string Url_PoENinja_Builds = "https://poe.ninja/challenge/builds";
+        private const string Url_PoETrade = "https://www.pathofexile.com/trade";
+        private const string Url_PlayerAccount = "https://www.pathofexile.com/my-account";
         private Regex regPoENinjaUrl = new Regex("https://poe.ninja/[a-z]+/(builds|currency)");
         private string LastUrlLoaded = "";
-        private string LoadingUrl;
 
         ObservableCollection<HamburgerMenuItemBase> HamburderMenuItems = new ObservableCollection<HamburgerMenuItemBase>();
         HamburgerMenuHeaderItem HamburgerMenuHeader;
@@ -57,8 +56,6 @@ namespace PoEW.Application {
         private void Init() {
             MessageController.Instance().AddLogger(new FileLogger());
             MessageController.Instance().AddLogger(new ConsoleLogger(console));
-
-            LoadingUrl = Url_PoETrade;
 
             var lastPlayer = Session.Instance().GetLastPlayer().Result;
 
@@ -76,9 +73,8 @@ namespace PoEW.Application {
             Cookie cookie = new Cookie();
             cookie.Name = "POESESSID";
             cookie.Value = Session.Instance().Player.SessionId;
-            if (await cookieManager.SetCookieAsync("https://www.pathofexile.com/trade", cookie)) {
-                var g = 0;
-            }
+            await cookieManager.SetCookieAsync(Url_PoETrade, cookie);
+            await cookieManager.SetCookieAsync(Url_PlayerAccount, cookie);
         }
 
         private void SetupEvents() {
@@ -122,6 +118,8 @@ namespace PoEW.Application {
                 return webBrowser_PoENinja_ChallengeCurrency;
             } else if (webBrowser_PoENinja_Builds.Visibility == Visibility.Visible) {
                 return webBrowser_PoENinja_Builds;
+            } else if (webBrowser.Visibility == Visibility.Visible) {
+                return webBrowser;
             }
 
             return null;
@@ -356,6 +354,7 @@ namespace PoEW.Application {
             webBrowser_PoENinja_StandardCurrency.Visibility = Visibility.Hidden;
             webBrowser_PoENinja_ChallengeCurrency.Visibility = Visibility.Hidden;
             webBrowser_PoENinja_Builds.Visibility = Visibility.Hidden;
+            webBrowser.Visibility = Visibility.Hidden;
         }
 
         private async void hamMenShopThreads_ItemClick(object sender, ItemClickEventArgs args) {
@@ -370,7 +369,7 @@ namespace PoEW.Application {
             webBrowser_PoENinja_ChallengeCurrency.SetValue(Grid.RowSpanProperty, collapsed ? 2 : 3);
             webBrowser_PoENinja_StandardCurrency.SetValue(Grid.RowSpanProperty, collapsed ? 2 : 3);
             webBrowser_PoETrade.SetValue(Grid.RowSpanProperty, collapsed ? 2 : 3);
-
+            webBrowser.SetValue(Grid.RowSpanProperty, collapsed ? 2 : 3);
         }
 
         private void btnShowHideConsole_Click(object sender, RoutedEventArgs e) {
@@ -381,6 +380,10 @@ namespace PoEW.Application {
             btnShowHideConsole.Margin = isVisible ? new Thickness(0, 0, 0, 5) : new Thickness(0, 0, 20, 5);
 
             SetBrowsersHeight(!isVisible);
+        }
+
+        private void btnAccount_Click(object sender, RoutedEventArgs e) {
+            System.Diagnostics.Process.Start(Url_PlayerAccount);
         }
     }
 }

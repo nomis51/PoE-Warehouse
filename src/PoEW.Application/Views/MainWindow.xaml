@@ -108,7 +108,7 @@
                 </Button.ContentTemplate>
             </Button>
 
-            <Button Name="btnAccount">
+            <Button Name="btnAccount" Click="btnAccount_Click">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -189,6 +189,7 @@
         <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_ChallengeCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/currency"/>
         <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_StandardCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/standard/currency"/>
         <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_Builds" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/builds"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" />
 
         <mah:ProgressRing Name="loaderWebBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="False"></mah:ProgressRing>
 

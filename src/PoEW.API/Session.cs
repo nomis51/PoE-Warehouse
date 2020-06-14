@@ -50,6 +50,19 @@ namespace PoEW.Data {
 
         public Shop GetFirstShop() => AnyShops() ? ShopThreads.Values.FirstOrDefault() : null;
 
+        public async Task<bool> CreateShopThread(string league) {
+            if (!string.IsNullOrEmpty(league)) {
+                int threadId = await _api.GenerateShopThread(league, Player);
+
+                if (threadId != -1) {
+                    await AddShop(threadId, league);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private async void Shop_OnRequestShopThreadUpdate(Shop shop) {
             await _dataStore.DeleteAll<API.Models.Price>();
 

@@ -53,7 +53,7 @@ namespace PoEW.Application.Controls {
         }
 
         private void PricingFormWin_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-          if(WindowController.Instance().PricingFormWin.Visibility == Visibility.Hidden) {
+            if (WindowController.Instance().PricingFormWin.Visibility == Visibility.Hidden) {
                 PricingForm_Closed();
             }
         }
@@ -141,8 +141,10 @@ namespace PoEW.Application.Controls {
                 img.Width = 25;
                 img.Height = 25;
                 // Avoid tooltip from not displaying, because the actual item image isn't mouse hover
+                // same thing for the pricing form
                 img.MouseEnter += imgIconUrl_MouseEnter;
                 img.MouseLeave += imgIconUrl_MouseLeave;
+                img.MouseRightButtonUp += imgIconUrl_MouseRightButtonUp;
 
 
                 switch (socket.Colour) {
@@ -251,11 +253,22 @@ namespace PoEW.Application.Controls {
         }
 
         private void imgIconUrl_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
+            var price = Session.Instance().GetShop().GetPrice(Item.Id);
+
+            if (price != null) {
+                WindowController.Instance().PricingFormWin.SetPrice(price);
+            } else {
+                WindowController.Instance().PricingFormWin.Reset();
+            }
+
+            WindowController.Instance().PricingFormWin.SetItemId(Item.Id);
             WindowController.Instance().PricingFormWin.ShowDialog();
         }
 
         private void PricingForm_Closed() {
-            EditPriceNote();
+            if (WindowController.Instance().PricingFormWin.ItemId == Item.Id) {
+                EditPriceNote();
+            }
         }
 
         private void EditPriceNote() {

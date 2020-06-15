@@ -108,7 +108,7 @@
                 </Button.ContentTemplate>
             </Button>
 
-            <Button Name="btnAccount">
+            <Button Name="btnAccount" Click="btnAccount_Click">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -162,6 +162,7 @@
             ItemTemplate="{StaticResource MenuItemTemplate}"
             OptionsItemTemplate="{StaticResource MenuItemTemplate}"
             ItemClick="hamMenShopThreads_ItemClick"
+            SelectedIndex="0"
             DisplayMode="CompactOverlay">
             <!--  Items  -->
             <mah:HamburgerMenu.ItemsSource>
@@ -189,12 +190,13 @@
         <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_ChallengeCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/currency"/>
         <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_StandardCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/standard/currency"/>
         <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_Builds" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/builds"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" />
 
         <mah:ProgressRing Name="loaderWebBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="False"></mah:ProgressRing>
 
         <mah:ProgressRing Name="loaderStash" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True"></mah:ProgressRing>
 
-        <Button Name="btnAddShop" Click="btnAddShop_Click" Panel.ZIndex="10" Margin="5 0 0 5" Width="35" Height="35" ToolTip="Add a new shop" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="99" Grid.RowSpan="99" Style="{DynamicResource MahApps.Styles.Button.Circle}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+        <Button Name="btnAddShop" Click="btnAddShop_Click" Background="Black" Panel.ZIndex="10" Margin="5 0 0 5" Width="35" Height="35" ToolTip="Add a new shop" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="99" Grid.RowSpan="99" Style="{DynamicResource MahApps.Styles.Button.Circle}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
             <Button.ContentTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
@@ -206,5 +208,20 @@
                 </DataTemplate>
             </Button.ContentTemplate>
         </Button>
+
+        <Button Name="btnShowHideConsole" Click="btnShowHideConsole_Click" Background="Black" Panel.ZIndex="12" Margin="0 0 0 5" Width="25" Height="25" ToolTip="Show/Hide the log console" Grid.Column="2" Grid.Row="0" Grid.ColumnSpan="99" Grid.RowSpan="99" Style="{DynamicResource MahApps.Styles.Button.Circle}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconFontAwesome Width="15"
+                                        Height="15"
+                                        VerticalAlignment="Center"
+                                        Kind="TerminalSolid" />
+                    </StackPanel>
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
+
+        <controls:ConsoleControl x:Name="console" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" Visibility="Hidden" Panel.ZIndex="11"></controls:ConsoleControl>
     </Grid>
 </mah:MetroWindow>

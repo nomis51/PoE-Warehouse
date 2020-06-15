@@ -39,9 +39,9 @@
 
         <Popup Name="popItemTooltip" Placement="Right" HorizontalOffset="5">
             <local:ItemTooltipControl x:Name="itemTooltipControl"></local:ItemTooltipControl>
-        </Popup>    
+        </Popup>
 
-        <Image x:Name="imgIconUrl" Grid.Row="0" Grid.RowSpan="99" Grid.Column="0" Grid.ColumnSpan="99" Stretch="Fill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseEnter="imgIconUrl_MouseEnter" MouseLeave="imgIconUrl_MouseLeave" MouseRightButtonUp="imgIconUrl_MouseRightButtonUp"></Image>
+        <Image x:Name="imgIconUrl" Grid.Row="0" Grid.RowSpan="99" Grid.Column="0" Grid.ColumnSpan="99" Stretch="Fill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  MouseEnter="imgIconUrl_MouseEnter" MouseLeave="imgIconUrl_MouseLeave" MouseRightButtonUp="imgIconUrl_MouseRightButtonUp"></Image>
         <TextBlock Name="txtbStackSize" Visibility="Hidden" Foreground="White" Text="10" FontWeight="Bold" FontSize="10" Grid.Row="0" Grid.Column="0" Margin="3 1 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"></TextBlock>
         <DockPanel  Panel.ZIndex="9999" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="0" Grid.Column="0" Grid.RowSpan="99" Grid.ColumnSpan="99">
             <TextBlock Name="txtbPriceAmount" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="0" Grid.Column="0" Grid.RowSpan="99" Grid.ColumnSpan="99"></TextBlock>

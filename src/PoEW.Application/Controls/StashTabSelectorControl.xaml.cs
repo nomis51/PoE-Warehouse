@@ -29,6 +29,7 @@ namespace PoEW.Application.Controls {
         Dictionary<int, Label> Labels = new Dictionary<int, Label>();
         BitmapImage bmpTab;
         BitmapImage bmpSelectedTab;
+        int ActiveTabIndex = 0;
 
         public delegate void StashTabSelected(int index);
         public event StashTabSelected OnStashTabSelected;
@@ -44,6 +45,7 @@ namespace PoEW.Application.Controls {
         }
 
         public void SetActiveTab(int index) {
+            ActiveTabIndex = index;
             Images[index + 1].Source = bmpSelectedTab;
             UnselectOtherTabs(index + 1);
         }
@@ -100,6 +102,10 @@ namespace PoEW.Application.Controls {
                 Label lblTab = GenerateTabLabel(index, name);
                 Labels.Add(Tabs.Count, lblTab);
                 grd.Children.Add(lblTab);
+
+                if (Tabs.Count > ActiveTabIndex) {
+                    SetActiveTab(ActiveTabIndex);
+                }
             });
         }
 

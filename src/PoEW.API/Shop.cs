@@ -128,6 +128,7 @@ namespace PoEW.Data {
         private Dictionary<string, int> ItemIdToTabIndex = new Dictionary<string, int>();
         private Dictionary<string, Price> ItemIdToPrice = new Dictionary<string, Price>();
         private Dictionary<Price, List<string>> PriceToItems = new Dictionary<Price, List<string>>();
+        private List<string> IgnoredItems = new List<string>();
 
         public League League { get; set; }
         public int ThreadId { get; set; }
@@ -146,11 +147,17 @@ namespace PoEW.Data {
             string threadContent = "";
 
             foreach (var mapPriceItem in PriceToItems) {
-                threadContent += ToSpoiler(mapPriceItem.Key, mapPriceItem.Value.Select(itemId => Items[itemId]).ToList());
+                string spoiler = ToSpoiler(mapPriceItem.Key, mapPriceItem.Value.Select(itemId => Items[itemId]).ToList());
+
+                if (spoiler.Length > 0) {
+                    threadContent += spoiler;
+                }
             }
 
-            return threadContent;
+            return threadContent.Length > 0 ? threadContent : "Reserved";
         }
+
+        public Price GetPrice(string itemId) => ItemIdToPrice.ContainsKey(itemId) ? ItemIdToPrice[itemId] : null;
 
         public Dictionary<string, Price> GetPrices() => ItemIdToPrice;
 
@@ -160,13 +167,15 @@ namespace PoEW.Data {
             string content = "";
 
             foreach (var item in items) {
-                int tabIndex = ItemIdToTabIndex[item.Id];
-                content += ToLinkItem(item, tabIndex);
+                if (!IgnoredItems.Contains(item.Id)) {
+                    int tabIndex = ItemIdToTabIndex[item.Id];
+                    content += ToLinkItem(item, tabIndex);
+                }
             }
 
             string spoilerClose = "[/spoiler]";
 
-            return $"{spoilerOpen}{content}{spoilerClose}";
+            return content.Length > 0 ? $"{spoilerOpen}{content}{spoilerClose}" : "";
         }
 
         private string ToLinkItem(Item item, int tabIndex) {
@@ -257,7 +266,7 @@ namespace PoEW.Data {
             PriceToItems.Clear();
         }
 
-        public void SetPrice(string itemId, Price price) {
+        public void SetPrice(string itemId, Price price, bool isActive) {
             Price oldPrice = null;
             if (ItemIdToPrice.ContainsKey(itemId)) {
                 oldPrice = ItemIdToPrice[itemId];
@@ -284,6 +293,13 @@ namespace PoEW.Data {
                 }
             } else {
                 PriceToItems.Add(price, new List<string>() { itemId });
+            }
+
+            index = -1;
+            if (!isActive && (index = IgnoredItems.IndexOf(itemId)) == -1) {
+                IgnoredItems.Add(itemId);
+            } else if (index != -1) {
+                IgnoredItems.RemoveAt(index);
             }
 
             OnRequestShopThreadUpdate(this);

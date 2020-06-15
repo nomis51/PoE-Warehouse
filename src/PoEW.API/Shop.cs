@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Primitives;
+using PoEW.API.Logging;
 using PoEW.API.Models;
 using PoEW.Data.Enums;
 using PoEW.Data.Models;
@@ -129,6 +130,7 @@ namespace PoEW.Data {
         private Dictionary<string, Price> ItemIdToPrice = new Dictionary<string, Price>();
         private Dictionary<Price, List<string>> PriceToItems = new Dictionary<Price, List<string>>();
         private List<string> IgnoredItems = new List<string>();
+        private Dictionary<int, TabPrice> WholeTabPrice = new Dictionary<int, TabPrice>();
 
         public League League { get; set; }
         public int ThreadId { get; set; }
@@ -266,7 +268,31 @@ namespace PoEW.Data {
             PriceToItems.Clear();
         }
 
-        public void SetPrice(string itemId, Price price, bool isActive) {
+        public TabPrice GetWholeTabPrice(int index) => WholeTabPrice.ContainsKey(index) ? WholeTabPrice[index] : null;
+
+        public void SetWholeTabPrice(int tabIndex, Price price) {
+            if (WholeTabPrice.ContainsKey(tabIndex)) {
+                WholeTabPrice[tabIndex] = new TabPrice(ThreadId, tabIndex, price);
+            } else {
+                WholeTabPrice.Add(tabIndex, new TabPrice(ThreadId, tabIndex, price));
+            }
+
+            for (int i = 0; i < StashTabs[tabIndex].Items.Count; ++i) {
+                SetPrice(StashTabs[tabIndex].Items[i].Id, price, true, (i + 1) == StashTabs[tabIndex].Items.Count);
+            }
+        }
+
+        public void UnsetWholeTabPrice(int tabIndex) {
+            if (WholeTabPrice.ContainsKey(tabIndex)) {
+                WholeTabPrice.Remove(tabIndex);
+            }
+
+            foreach (var item in StashTabs[tabIndex].Items) {
+                UnsetPrice(item.Id);
+            }
+        }
+
+        public void SetPrice(string itemId, Price price, bool isActive, bool updateShopThread = true) {
             Price oldPrice = null;
             if (ItemIdToPrice.ContainsKey(itemId)) {
                 oldPrice = ItemIdToPrice[itemId];
@@ -302,13 +328,25 @@ namespace PoEW.Data {
                 IgnoredItems.RemoveAt(index);
             }
 
-            OnRequestShopThreadUpdate(this);
+            if (updateShopThread) {
+                OnRequestShopThreadUpdate(this);
+            }
         }
 
         public void UnsetPrice(string itemId) {
             Price p = ItemIdToPrice[itemId];
             ItemIdToPrice.Remove(itemId);
             PriceToItems[p].Remove(itemId);
+        }
+
+        public void ApplyWholeTabPrices() {
+            MessageController.Instance().Log("Applying whole tab prices if needed...");
+            foreach (var tabPrice in WholeTabPrice) {
+                for (int i = 0; i < StashTabs[tabPrice.Key].Items.Count; ++i) {
+                    SetPrice(StashTabs[tabPrice.Key].Items[i].Id, tabPrice.Value.Price, true, (i + 1) < StashTabs[tabPrice.Key].Items.Count);
+                }
+            }
+            MessageController.Instance().Log("Whole tab prices applied.");
         }
     }
 }

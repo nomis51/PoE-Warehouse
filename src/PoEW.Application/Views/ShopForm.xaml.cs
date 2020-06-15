@@ -34,6 +34,7 @@ namespace PoEW.Application.Views {
             cboLeagues.ItemsSource = leagues;
         }
 
+     
         public void SetLeagues(List<League> leagues) {
             foreach (var league in leagues) {
                 this.leagues.Add(league.Name);

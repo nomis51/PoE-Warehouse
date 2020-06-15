@@ -23,6 +23,11 @@ namespace PoEW.Application.Controls {
     public partial class ConsoleControl : UserControl, IConsole {
         ObservableCollection<ListViewItem> Lines = new ObservableCollection<ListViewItem>();
 
+        int nbErrors = 0;
+
+        public delegate void ErrorLogFound(int nbErrors);
+        public event ErrorLogFound OnErrorLogFound;
+
         public ConsoleControl() {
             InitializeComponent();
         }
@@ -35,6 +40,21 @@ namespace PoEW.Application.Controls {
             item.HorizontalAlignment = HorizontalAlignment.Left;
             item.VerticalAlignment = VerticalAlignment.Center;
             item.Content = content;
+
+            if (content.IndexOf("[Debug]") != -1) {
+                item.Foreground = Brushes.Lime;
+            }
+
+            if (content.IndexOf("[Error]") != -1) {
+                ++nbErrors;
+                item.Foreground = Brushes.Red;
+                OnErrorLogFound(nbErrors);
+            }
+
+            if (content.IndexOf("[Warn]") != -1) {
+                item.Foreground = Brushes.Yellow;
+            }
+
             return item;
         }
 

@@ -26,6 +26,9 @@ namespace PoEW.Application.Views {
         public Price Price = null;
         public string ItemId { get; private set; }
         private bool IsPriceActive = true;
+        public bool PricingWholeTab { get; private set; } = false;
+        public int WholeTabIndex { get; private set; }
+
 
         public bool Success { get; private set; } = false;
 
@@ -33,6 +36,11 @@ namespace PoEW.Application.Views {
             InitializeComponent();
 
             this.Loaded += PricingForm_Loaded;
+        }
+
+        public void SetPricingWholeTab(int tabIndex, bool state = false) {
+            PricingWholeTab = state;
+            WholeTabIndex = tabIndex;
         }
 
         public void Reset() {
@@ -78,7 +86,12 @@ namespace PoEW.Application.Views {
         }
 
         private void UnsetPrice() {
-            Session.Instance().GetShop().UnsetPrice(ItemId);
+            if (PricingWholeTab) {
+                Session.Instance().UnsetWholeTabPrice(Session.Instance().GetSelectedTabIndex());
+            } else {
+                Session.Instance().GetShop().UnsetPrice(ItemId);
+            }
+
             Success = true;
             Close();
         }
@@ -92,7 +105,12 @@ namespace PoEW.Application.Views {
 
             if ((price = ValidatePrice()) != -1) {
                 Price = new Price(Shop.StringToCurrencyType[cboCurrencies.SelectedValue.ToString()], Shop.PrefixToPriceType[cboTypes.SelectedValue.ToString()], price);
-                Session.Instance().GetShop().SetPrice(ItemId, Price, IsPriceActive);
+
+                if (PricingWholeTab) {
+                    Session.Instance().SetWholeTabPrice(Session.Instance().GetSelectedTabIndex(), Price);
+                } else {
+                    Session.Instance().GetShop().SetPrice(ItemId, Price, IsPriceActive);
+                }
 
                 Success = true;
                 Close();

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
+using PoEW.API.Logging;
 using PoEW.API.Models;
 using PoEW.Data;
 using PoEW.Data.Abstractions;
@@ -39,11 +40,21 @@ namespace PoEW.API {
         }
 
         private async Task<string> GetForumPage() {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log("[Debug][API] Retrieving forum page...");
+            }
+
             var uri = new Uri(Url_MainPoEPage);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
-                return await client.GetStringAsync(BaseUrl_Forum);
+                try {
+                    return await client.GetStringAsync(BaseUrl_Forum);
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving forum page: {e.Message}");
+
+                    return null;
+                }
             }
         }
 
@@ -66,12 +77,22 @@ namespace PoEW.API {
         }
 
         private async Task<string> GetNewThreadPage(string forumId, string sessionId) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log($"[Debug][API] Retrieving the new-thread page for forum section {forumId}...");
+            }
+
             var uri = new Uri(Url_MainPoEPage);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
                 cookieContainer.Add(uri, new Cookie(PoESessionIdCookieName, sessionId));
-                return await client.GetStringAsync(BaseUrlTemplate_NewThread.Replace("$forumId$", forumId));
+                try {
+                    return await client.GetStringAsync(BaseUrlTemplate_NewThread.Replace("$forumId$", forumId));
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving the new-thread page for forum section {forumId}: {e.Message}");
+
+                    return null;
+                }
             }
         }
 
@@ -102,8 +123,10 @@ namespace PoEW.API {
                         if (response.IsSuccessStatusCode) {
                             return Convert.ToInt32(response.RequestMessage.RequestUri.Segments.Last());
                         }
+
+                        MessageController.Instance().Log($"[Error][API] Error while generating a new forum thread: HTTP{response.StatusCode} {response.ReasonPhrase}");
                     } catch (HttpRequestException e) {
-                        // TODO: log exception
+                        MessageController.Instance().Log($"[Error][API] Error while generating a new forum thread: {e.Message}");
 
                         return -1;
                     }
@@ -114,22 +137,31 @@ namespace PoEW.API {
         }
 
         public async Task<string> GetShopThreadTitle(int threadId) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log($"[Debug][API] Retrieving thread title of thread {threadId}...");
+            }
+
             var uri = new Uri(Url_MainPoEPage);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
-                var html = await client.GetStringAsync(BaseUrl_ViewThread.Replace("$threadId$", threadId.ToString()));
+                try {
+                    var html = await client.GetStringAsync(BaseUrl_ViewThread.Replace("$threadId$", threadId.ToString()));
 
-                string title = Utils.FindTextBetween(html, "<h1 class=\"topBar last layoutBoxTitle\">", "</h1>");
-                return title;
+                    string title = Utils.FindTextBetween(html, "<h1 class=\"topBar last layoutBoxTitle\">", "</h1>");
+                    return title;
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving thread title of thread {threadId}: {e.Message}");
+
+                    return null;
+                }
             }
         }
 
-        public async Task RefreshOnlineStatus(Player player) {
+        public async Task<bool> RefreshOnlineStatus(Player player) {
             if (!string.IsNullOrEmpty(player.OnlineCode)) {
                 if (!await VerifyOnlineStatus(player.OnlineCode)) {
-                    await BecomeOnline(player.OnlineCode);
-                    return;
+                    return await BecomeOnline(player.OnlineCode);
                 }
 
                 var uri = new Uri(Url_OnlineControl);
@@ -137,41 +169,78 @@ namespace PoEW.API {
                 using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
                 using (var client = new HttpClient(handler) { BaseAddress = uri }) {
                     var response = await client.PostAsync($"{player.OnlineCode}/online-league", null);
+
+                    if (!response.IsSuccessStatusCode) {
+                        MessageController.Instance().Log($"[Error][API] Error while refreshing online status: HTTP{response.StatusCode} {response.ReasonPhrase}");
+                        return false;
+                    }
+
+                    return true;
                 }
             }
+
+            return false;
         }
 
 
 
         private async Task<bool> BecomeOnline(string onlineCode) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log("[Debug][API] Auto-Online Status: Going from Offline to Online");
+            }
+
             var uri = new Uri(Url_OnlineControl);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
                 var response = await client.PostAsync(onlineCode, null);
 
+                if (!response.IsSuccessStatusCode) {
+                    MessageController.Instance().Log($"[Error][API] Error while going from Offline to Online: HTTP{response.StatusCode} {response.ReasonPhrase}");
+                }
+
                 return response.IsSuccessStatusCode;
             }
         }
 
         private async Task<bool> VerifyOnlineStatus(string onlineCode) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log("[Debug][API] Verifying Online status...");
+            }
+
             var uri = new Uri(Url_OnlineControl);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
-                var response = await client.GetStringAsync(onlineCode);
-
-                return response.IndexOf("You are not online. Or maybe you are. Who knows.") == -1;
+                try {
+                    var response = await client.GetStringAsync(onlineCode);
+                    return response.IndexOf("You are not online. Or maybe you are. Who knows.") == -1;
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while verifying online status: {e.Message}");
+                    return false;
+                }
             }
         }
 
-        public async Task NotifyPoETrade(int threadId, string sessionId) {
+        public async Task<bool> NotifyPoETrade(int threadId, string sessionId) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log("[Debug][API] Notifying poe.trade for thread indexing...");
+            }
+
             var uri = new Uri(Url_VerifyPoETrade);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
                 cookieContainer.Add(uri, new Cookie(PoESessionIdCookieName, sessionId));
-                var response = await client.GetStringAsync(BaseUrlTemplate_VerifyPoETrade.Replace("$threadId$", threadId.ToString()));
+
+                try {
+                    var response = await client.GetStringAsync(BaseUrlTemplate_VerifyPoETrade.Replace("$threadId$", threadId.ToString()));
+
+                    return true;
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while notifying poe.trade for thread indexing: {e.Message}");
+                    return false;
+                }
             }
         }
 
@@ -179,6 +248,11 @@ namespace PoEW.API {
             List<League> leagues = new List<League>();
 
             string raw = await GetLeaguesPage();
+
+            if (raw == null) {
+                return null;
+            }
+
             var data = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(raw);
 
             foreach (var d in data) {
@@ -191,17 +265,30 @@ namespace PoEW.API {
         }
 
         private async Task<string> GetLeaguesPage() {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log("[Debug][API] Retrieving leagues...");
+            }
+
             var uri = new Uri(Url_ApiPoE);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
-                return await client.GetStringAsync(BaseUrl_Leagues);
+                try {
+                    return await client.GetStringAsync(BaseUrl_Leagues);
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving leagues: {e.Message}");
+                    return null;
+                }
             }
         }
 
         public async Task<string> GetAccountName(string sessionId) {
             if (!string.IsNullOrEmpty(sessionId)) {
                 string html = await GetAccountPage(sessionId);
+
+                if (html == null) {
+                    return null;
+                }
 
                 return Utils.FindTextBetween(html, "<a href=\"/account/view-profile/", "\">");
             }
@@ -210,26 +297,36 @@ namespace PoEW.API {
         }
 
         private async Task<string> GetAccountPage(string sessionId) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log("[Debug][API] Retrieving account page...");
+            }
+
             var uri = new Uri(Url_MainPoEPage);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
                 cookieContainer.Add(uri, new Cookie(PoESessionIdCookieName, sessionId));
-                return await client.GetStringAsync(BaseUrl_Account);
+
+                try {
+                    return await client.GetStringAsync(BaseUrl_Account);
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while retieving account page: {e.Message}");
+                    return null;
+                }
             }
         }
 
-        public async Task UpdateShopThread(int threadId, Player player, string content) {
+        public async Task<bool> UpdateShopThread(int threadId, Player player, string content) {
             string editThreadPage = await GetEditThreadPage(threadId, player.SessionId);
 
             if (editThreadPage == null) {
-                return;
+                return false;
             }
 
             string csrfToken = Utils.GetCsrfToken(editThreadPage, "hash");
 
             if (string.IsNullOrEmpty(csrfToken)) {
-                return;
+                return false;
             }
 
             string title = Utils.FindTextBetween(editThreadPage, "<input type=\"text\" name=\"title\" id=\"title\" onkeypress=\"return&#x20;event.keyCode&#x21;&#x3D;13\" value=\"", "\">");
@@ -250,17 +347,24 @@ namespace PoEW.API {
                     var response = await client.PostAsync(baseUrl, new StringContent(data.Build(), Encoding.UTF8, "application/x-www-form-urlencoded"));
 
                     if (response.IsSuccessStatusCode) {
-                        await NotifyPoETrade(threadId, player.SessionId);
+                        if (await NotifyPoETrade(threadId, player.SessionId)) {
+                            return true;
+                        }
                     }
                 } catch (HttpRequestException e) {
-                    // TODO: log exception
-
-                    return;
+                    MessageController.Instance().Log($"[Error][API] Error while updating shop thread {threadId}: {e.Message}");
+                    return false;
                 }
             }
+
+            return false;
         }
 
         public async Task<string> GetEditThreadPage(int threadId, string sessionId) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log($"[Debug][API] Retrieving edit-thread page for thread {threadId}...");
+            }
+
             var uri = new Uri(Url_MainPoEPage);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
@@ -269,18 +373,21 @@ namespace PoEW.API {
                 try {
                     return await client.GetStringAsync(BaseUrlTemplate_EditThread.Replace("$threadId$", threadId.ToString()));
                 } catch (HttpRequestException e) {
-                    // TODO: log
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving edit-thread page for thread {threadId}: {e.Message}");
                     return null;
                 }
             }
         }
 
         public async Task<List<StashTab>> UpdateLocalStash(Player player, League league) {
-            var stashTabs = await GetStashTabs(league.Name, player);
-            return stashTabs;
+            return await GetStashTabs(league.Name, player);
         }
 
         public async Task<List<StashTab>> GetStashTabs(string league, Player player) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log($"[Debug][API] Retrieving stash tabs for league {league}...");
+            }
+
             List<StashTab> stashTabs = new List<StashTab>();
 
             var uri = new Uri(Url_MainPoEPage);
@@ -294,23 +401,33 @@ namespace PoEW.API {
                 query.Add("tabs", "1");
                 query.Add("tabIndex", "0");
                 query.Add("accountName", player.AccountName);
+                try {
+                    var data = await client.GetStringAsync(BaseUrl_StashItems + query.Build(true));
+                    var parsedData = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+                    var tabsStr = parsedData["tabs"].ToString();
+                    var parsedTabs = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(tabsStr);
+                    stashTabs = parsedTabs.Select(t => new StashTab(t, league)).ToList();
 
-                var data = await client.GetStringAsync(BaseUrl_StashItems + query.Build(true));
-                var parsedData = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-                var tabsStr = parsedData["tabs"].ToString();
-                var parsedTabs = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(tabsStr);
-                stashTabs = parsedTabs.Select(t => new StashTab(t, league)).ToList();
+                    var itemsStr = parsedData["items"].ToString();
+                    var parsedItems = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(itemsStr);
+                    List<Item> items = ParseItems(parsedItems);
 
-                var itemsStr = parsedData["items"].ToString();
-                var parsedItems = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(itemsStr);
-                List<Item> items = ParseItems(parsedItems);
-
-                stashTabs.Find(t => t.Index == 0).Items = items;
+                    stashTabs.Find(t => t.Index == 0).Items = items;
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving stash tabs for league {league}: {e.Message}");
+                    return null;
+                }
             }
 
             foreach (var tab in stashTabs) {
                 if (tab.Index > 0) {
-                    tab.Items = await GetItems(tab.Index, league, player);
+                    var items = await GetItems(tab.Index, league, player);
+
+                    if (items != null) {
+                        tab.Items = items;
+                    } else {
+                        MessageController.Instance().Log($"[Warn][API] Getting items for tab #{tab.Index} failed.");
+                    }
                 }
             }
 
@@ -318,6 +435,10 @@ namespace PoEW.API {
         }
 
         public async Task<List<Item>> GetItems(int tabIndex, string league, Player player) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log($"[Debug][API] Retrieving items of tab #{tabIndex} of {league} league...");
+            }
+
             var uri = new Uri(Url_MainPoEPage);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
@@ -330,15 +451,19 @@ namespace PoEW.API {
                 query.Add("tabIndex", tabIndex.ToString());
                 query.Add("accountName", player.AccountName);
 
-                var data = await client.GetStringAsync(BaseUrl_StashItems + query.Build(true));
-                var parsedData = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+                try {
+                    var data = await client.GetStringAsync(BaseUrl_StashItems + query.Build(true));
+                    var parsedData = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
 
-                var itemsStr = parsedData["items"].ToString();
-                var parsedItems = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(itemsStr);
-                List<Item> items = ParseItems(parsedItems);
+                    var itemsStr = parsedData["items"].ToString();
+                    var parsedItems = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(itemsStr);
+                    List<Item> items = ParseItems(parsedItems);
 
-
-                return items;
+                    return items;
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving items of tab #{tabIndex} of {league} league: {e.Message}");
+                    return null;
+                }
             }
         }
 
@@ -353,20 +478,30 @@ namespace PoEW.API {
         }
 
         public async Task<List<Character>> GetCharacters(string sessionId) {
+            if (Settings.Data().Get<bool>("Debug")) {
+                MessageController.Instance().Log("[Debug][API] Retrieving characters...");
+            }
+
             var uri = new Uri(Url_MainPoEPage);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = uri }) {
                 cookieContainer.Add(uri, new Cookie(PoESessionIdCookieName, sessionId));
-                var data = await client.GetStringAsync(BaseUrl_Characters);
 
-                if (data.Length == 0) {
-                    return new List<Character>();
+                try {
+                    var data = await client.GetStringAsync(BaseUrl_Characters);
+
+                    if (data.Length == 0) {
+                        return new List<Character>();
+                    }
+
+                    var parsedData = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(data);
+
+                    return parsedData.Select(d => new Character(d)).ToList();
+                } catch (HttpRequestException e) {
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving characters: {e.Message}");
+                    return null;
                 }
-
-                var parsedData = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(data);
-
-                return parsedData.Select(d => new Character(d)).ToList();
             }
         }
     }

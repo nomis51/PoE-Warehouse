@@ -1,3 +1,4 @@
 ﻿{
-  "StashRefreshRate": 30
+  "StashRefreshRate": 30,
+  "Debug":  true
 }

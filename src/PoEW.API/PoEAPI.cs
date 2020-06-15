@@ -373,7 +373,7 @@ namespace PoEW.API {
                 try {
                     return await client.GetStringAsync(BaseUrlTemplate_EditThread.Replace("$threadId$", threadId.ToString()));
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API] Error while retrieving edit-thread page for thread {threadId}: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API]  retrieving edit-thread page for thread {threadId}: {e.Message}");
                     return null;
                 }
             }

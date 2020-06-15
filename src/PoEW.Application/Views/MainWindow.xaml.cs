@@ -240,7 +240,7 @@ namespace PoEW.Application {
 
             if (!Session.Instance().GetShop().GetStashTabs().Any()) {
                 stashTabControl.ClearStashTab();
-                await Session.Instance().UpdateLocalStash(threadId);
+                Session.Instance().UpdateLocalStash(threadId);
             }
 
             foreach (var tab in Session.Instance().GetShop().GetStashTabsName()) {

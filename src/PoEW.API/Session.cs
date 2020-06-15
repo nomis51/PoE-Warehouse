@@ -7,6 +7,7 @@ using PoEW.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,7 +76,8 @@ namespace PoEW.Data {
                 ThreadId = shop.ThreadId
             }).ToList());
 
-            await UpdateShopThread(shop);
+
+            _ = Task.Run(() => UpdateShopThread(shop));
         }
 
         public void SetSelectedTab(int index) {
@@ -102,12 +104,12 @@ namespace PoEW.Data {
         }
 
         public void RunLocalStashUpdater() {
-            Task.Run(async () => {
+            Task.Run(() => {
                 MessageController.Instance().Log("Local Stash Updater started.");
                 while (true) {
                     int threadId = CurrentThreadId;
 
-                    if (await UpdateLocalStash(threadId)) {
+                    if (UpdateLocalStash(threadId)) {
                         if (!IsLocalStashUpdaterPaused && GetShop(threadId).League.Name == GetShop(CurrentThreadId).League.Name) {
                             MessageController.Instance().Log($"{GetShop(threadId).League.Name} local stash updated.");
                             OnLocalStashTabsUpdated(ShopThreads[threadId].GetStashTabs());
@@ -120,13 +122,12 @@ namespace PoEW.Data {
         }
 
         public void RunShopThreadUpdater() {
-            Task.Run(async () => {
+            Task.Run(() => {
                 MessageController.Instance().Log("Shop Thread Updater started.");
                 while (true) {
                     var shop = GetShop();
-                    MessageController.Instance().Log($"Updating shop thread {shop.ThreadId} {shop.Title}...");
 
-                    if (await UpdateShopThread(shop)) {
+                    if (UpdateShopThread(shop)) {
                         MessageController.Instance().Log($"Shop thread {shop.ThreadId} {shop.Title} updated.");
                     } else {
                         MessageController.Instance().Log($"[Warn][Session] Updating shop thread {shop.ThreadId} {shop.Title} failed.");
@@ -137,8 +138,12 @@ namespace PoEW.Data {
             });
         }
 
-        public async Task<bool> UpdateLocalStash(int threadId) {
-            Lock_LocalStashUpdate.WaitOne(1, true);
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public bool UpdateLocalStash(int threadId) {
+            if (!Lock_LocalStashUpdate.WaitOne(1, true)) {
+                return false;
+            }
+
             if ((DateTime.Now - LastLocalStashUpdate).TotalSeconds <= maxLocalStashUpdateRateInSeconds) {
                 Lock_LocalStashUpdate.ReleaseMutex();
                 return false;
@@ -146,10 +151,11 @@ namespace PoEW.Data {
 
             MessageController.Instance().Log($"Updating {GetShop(threadId).League.Name} local stash...");
 
-            var stashTabs = await _api.UpdateLocalStash(Player, ShopThreads[threadId].League);
+            var stashTabs = _api.UpdateLocalStash(Player, ShopThreads[threadId].League).Result;
 
             if (stashTabs == null) {
                 MessageController.Instance().Log("[Warn][Session] Updating local stash failed.");
+                LastLocalStashUpdate = DateTime.Now;
                 Lock_LocalStashUpdate.ReleaseMutex();
                 return false;
             }
@@ -164,13 +170,13 @@ namespace PoEW.Data {
                 StashTabs.Add(ShopThreads[threadId].League.Name, stashTabs);
             }
 
-            await _dataStore.Save(stashTabs, new string[] { "Items" });
+            _ = _dataStore.Save(stashTabs, new string[] { "Items" });
 
             ShopThreads[threadId].ClearStashTabs();
 
             foreach (var tab in stashTabs) {
                 if (tab.Items.Count > 0) {
-                    await _dataStore.Save(tab.Items);
+                    _ = _dataStore.Save(tab.Items);
                 }
 
                 ShopThreads[threadId].AddStashTab(tab);
@@ -251,18 +257,25 @@ namespace PoEW.Data {
 
         public bool AnyShops(int threadId) => ShopThreads.Keys.IndexOf(threadId) != -1;
 
-        public async Task<bool> UpdateShopThread(Shop shop) {
-            Lock_ShopThreadUpdate.WaitOne(1, true);
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public bool UpdateShopThread(Shop shop) {
+            if (!Lock_ShopThreadUpdate.WaitOne(1, true)) {
+                return false;
+            }
+
             if ((DateTime.Now - LastShopThreadUpdate).TotalSeconds <= maxShopThreadUpdateRateInSeconds) {
                 Lock_ShopThreadUpdate.ReleaseMutex();
                 return false;
             }
 
-            if (await _api.UpdateShopThread(CurrentThreadId, Player, shop.ToString())) {
+            MessageController.Instance().Log($"Updating shop thread {shop.ThreadId} {shop.Title}...");
+
+            if (_api.UpdateShopThread(CurrentThreadId, Player, shop.ToString()).Result) {
                 LastShopThreadUpdate = DateTime.Now;
                 MessageController.Instance().Log($"Shop thread {shop.ThreadId} {shop.Title} updated.");
             } else {
                 MessageController.Instance().Log($"[Warn][Session] Updating shop thread {shop.ThreadId} failed.");
+                LastShopThreadUpdate = DateTime.Now;
                 Lock_ShopThreadUpdate.ReleaseMutex();
                 return false;
             }

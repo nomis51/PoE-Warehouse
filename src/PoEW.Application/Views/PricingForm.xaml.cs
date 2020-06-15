@@ -35,8 +35,22 @@ namespace PoEW.Application.Views {
             this.Loaded += PricingForm_Loaded;
         }
 
+        public void Reset() {
+            txtPrice.Text = "";
+            cboCurrencies.SelectedValue = null;
+            cboTypes.SelectedValue = null;
+        }
+
         private void PricingForm_Loaded(object sender, RoutedEventArgs e) {
             Init();
+        }
+
+        public void SetPrice(Price price) {
+            Price = price;
+
+            txtPrice.Text = Price.Value.ToString();
+            cboCurrencies.SelectedValue = Shop.CurrencyTypeToString[Price.Currency];
+            cboTypes.SelectedValue = Shop.PriceTypeToPrefix[Price.Type];
         }
 
         public void SetItemId(string itemId) {

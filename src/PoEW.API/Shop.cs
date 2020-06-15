@@ -157,6 +157,8 @@ namespace PoEW.Data {
             return threadContent.Length > 0 ? threadContent : "Reserved";
         }
 
+        public Price GetPrice(string itemId) => ItemIdToPrice.ContainsKey(itemId) ? ItemIdToPrice[itemId] : null;
+
         public Dictionary<string, Price> GetPrices() => ItemIdToPrice;
 
         private string ToSpoiler(Price price, List<Item> items) {

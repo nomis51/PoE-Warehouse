@@ -10,13 +10,13 @@ It's a heavily featured trade and stash manager application. Greatly inspired by
 - Auto-Online 
 - Automatically update forum thread while needed
 - Automatically fetch stash when needed
-- Automatically create new thread
+- Automatically create new thread per league when needed
 - Integrate poe.ninja Currency and Builds with automatic league selection
 - Integrate www.pathofexile.com/trade with automatic league selection and auto-login
+- Show/Hide items on trading websites on demand
 
 ## TODO
 - Price expiration date and notification when it expires
-- Show/Hide items on trading websites on demand
 - Price checking and notifications if price might be wrong
 - Price a whole tab (can currently price items one-by-one)
 - Multi-user support

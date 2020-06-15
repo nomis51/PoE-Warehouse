@@ -51,7 +51,7 @@ namespace PoEW.API {
                 try {
                     return await client.GetStringAsync(BaseUrl_Forum);
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while retrieving forum page: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving forum page: {e.Message}");
 
                     return null;
                 }
@@ -89,7 +89,7 @@ namespace PoEW.API {
                 try {
                     return await client.GetStringAsync(BaseUrlTemplate_NewThread.Replace("$forumId$", forumId));
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while retrieving the new-thread page for forum section {forumId}: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving the new-thread page for forum section {forumId}: {e.Message}");
 
                     return null;
                 }
@@ -124,9 +124,9 @@ namespace PoEW.API {
                             return Convert.ToInt32(response.RequestMessage.RequestUri.Segments.Last());
                         }
 
-                        MessageController.Instance().Log($"[Error][API]  while generating a new forum thread: HTTP{response.StatusCode} {response.ReasonPhrase}");
+                        MessageController.Instance().Log($"[Error][API] Error while generating a new forum thread: HTTP{response.StatusCode} {response.ReasonPhrase}");
                     } catch (HttpRequestException e) {
-                        MessageController.Instance().Log($"[Error][API]  while generating a new forum thread: {e.Message}");
+                        MessageController.Instance().Log($"[Error][API] Error while generating a new forum thread: {e.Message}");
 
                         return -1;
                     }
@@ -151,7 +151,7 @@ namespace PoEW.API {
                     string title = Utils.FindTextBetween(html, "<h1 class=\"topBar last layoutBoxTitle\">", "</h1>");
                     return title;
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while retrieving thread title of thread {threadId}: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving thread title of thread {threadId}: {e.Message}");
 
                     return null;
                 }
@@ -172,7 +172,7 @@ namespace PoEW.API {
                     var response = await client.PostAsync($"{player.OnlineCode}/online-league", null);
 
                     if (!response.IsSuccessStatusCode) {
-                        MessageController.Instance().Log($"[Error][API]  while refreshing online status: HTTP{response.StatusCode} {response.ReasonPhrase}");
+                        MessageController.Instance().Log($"[Error][API] Error while refreshing online status: HTTP{response.StatusCode} {response.ReasonPhrase}");
                     }
                 }
             }
@@ -192,7 +192,7 @@ namespace PoEW.API {
                 var response = await client.PostAsync(onlineCode, null);
 
                 if (!response.IsSuccessStatusCode) {
-                    MessageController.Instance().Log($"[Error][API]  while going from Offline to Online: HTTP{response.StatusCode} {response.ReasonPhrase}");
+                    MessageController.Instance().Log($"[Error][API] Error while going from Offline to Online: HTTP{response.StatusCode} {response.ReasonPhrase}");
                 }
 
                 return response.IsSuccessStatusCode;
@@ -212,7 +212,7 @@ namespace PoEW.API {
                     var response = await client.GetStringAsync(onlineCode);
                     return response.IndexOf("You are not online. Or maybe you are. Who knows.") == -1;
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while verifying online status: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while verifying online status: {e.Message}");
                     return false;
                 }
             }
@@ -232,7 +232,7 @@ namespace PoEW.API {
                 try {
                     var response = await client.GetStringAsync(BaseUrlTemplate_VerifyPoETrade.Replace("$threadId$", threadId.ToString()));
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while notifying poe.trade for thread indexing: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while notifying poe.trade for thread indexing: {e.Message}");
                 }
             }
         }
@@ -264,7 +264,7 @@ namespace PoEW.API {
                 try {
                     return await client.GetStringAsync(BaseUrl_Leagues);
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while retrieving leagues: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving leagues: {e.Message}");
                     return null;
                 }
             }
@@ -298,7 +298,7 @@ namespace PoEW.API {
                 try {
                     return await client.GetStringAsync(BaseUrl_Account);
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while retieving account page: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retieving account page: {e.Message}");
                     return null;
                 }
             }
@@ -338,7 +338,7 @@ namespace PoEW.API {
                         await NotifyPoETrade(threadId, player.SessionId);
                     }
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while updating shop thread {threadId}: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while updating shop thread {threadId}: {e.Message}");
                     return;
                 }
             }
@@ -399,7 +399,7 @@ namespace PoEW.API {
 
                     stashTabs.Find(t => t.Index == 0).Items = items;
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while retrieving stash tabs for league {league}: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving stash tabs for league {league}: {e.Message}");
                     return new List<StashTab>();
                 }
             }
@@ -440,7 +440,7 @@ namespace PoEW.API {
 
                     return items;
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while retrieving items of tab #{tabIndex} of {league} league: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving items of tab #{tabIndex} of {league} league: {e.Message}");
                     return new List<Item>();
                 }
             }
@@ -478,7 +478,7 @@ namespace PoEW.API {
 
                     return parsedData.Select(d => new Character(d)).ToList();
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  while retrieving characters: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving characters: {e.Message}");
                     return new List<Character>();
                 }
             }

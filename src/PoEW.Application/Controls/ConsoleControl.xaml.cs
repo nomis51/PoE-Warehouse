@@ -30,8 +30,10 @@ namespace PoEW.Application.Controls {
         private ListViewItem GenerateLine(string content) {
             ListViewItem item = new ListViewItem();
             item.Padding = new Thickness(0);
-            item.Margin = new Thickness(0, -3, 0, -3);
             item.FontFamily = new FontFamily("Consolas");
+            item.Background = Brushes.Black;
+            item.HorizontalAlignment = HorizontalAlignment.Left;
+            item.VerticalAlignment = VerticalAlignment.Center;
             item.Content = content;
             return item;
         }
@@ -41,6 +43,7 @@ namespace PoEW.Application.Controls {
                 var item = GenerateLine(text);
                 Lines.Add(item);
                 lstv.ItemsSource = Lines;
+                ScrollToTheEnd();
             });
         }
 
@@ -49,6 +52,11 @@ namespace PoEW.Application.Controls {
                 Lines.Clear();
                 lstv.ItemsSource = Lines;
             });
+        }
+
+        private void ScrollToTheEnd() {
+            lstv.SelectedIndex = lstv.Items.Count > 0 ? lstv.Items.Count - 1 : 0;
+            lstv.ScrollIntoView(lstv.SelectedItem);
         }
     }
 }

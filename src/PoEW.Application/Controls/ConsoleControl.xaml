@@ -6,8 +6,10 @@
              xmlns:local="clr-namespace:PoEW.Application.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="Black">
-        <ListView x:Name="lstv" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        </ListView>
+    <Grid>
+        <Border Background="Gray">
+            <ListView Background="Black" Margin="3"  x:Name="lstv" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            </ListView>
+        </Border>
     </Grid>
 </UserControl>

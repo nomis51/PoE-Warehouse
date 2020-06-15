@@ -91,7 +91,20 @@ namespace PoEW.Application {
             webBrowser_PoENinja_StandardCurrency.FrameLoadStart += WebBrowser_FrameLoadStart;
             webBrowser_PoETrade.FrameLoadEnd += WebBrowser_FrameLoadEnd;
             webBrowser_PoETrade.FrameLoadStart += WebBrowser_FrameLoadStart;
-            webBrowser_PoETrade.IsBrowserInitializedChanged += WebBrowser_PoETrade_IsBrowserInitializedChanged; ;
+            webBrowser_PoETrade.IsBrowserInitializedChanged += WebBrowser_PoETrade_IsBrowserInitializedChanged;
+            console.OnErrorLogFound += Console_OnErrorLogFound;
+        }
+
+        private void Console_OnErrorLogFound(int nbErrors) {
+            if (nbErrors > 0) {
+                ShowConsoleErrorNotification(nbErrors);
+            }
+        }
+
+        private void ShowConsoleErrorNotification(int nbErrors) {
+            btnConsoleNbErrors.Content = nbErrors.ToString();
+            btnConsoleNbErrors.ToolTip = $"There {(nbErrors > 1 ? "are" : "is")} {nbErrors} error{(nbErrors > 1 ? "s" :"")}! Open the console to see {(nbErrors > 1 ? "it" : "them")}.";
+            btnConsoleNbErrors.Visibility = Visibility.Visible;
         }
 
         private void ShopFormWin_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
@@ -409,6 +422,9 @@ namespace PoEW.Application {
             btnShowHideConsole.HorizontalAlignment = isVisible ? HorizontalAlignment.Left : HorizontalAlignment.Right;
             btnShowHideConsole.Margin = isVisible ? new Thickness(0, 0, 0, 5) : new Thickness(0, 0, 20, 5);
 
+            btnConsoleNbErrors.HorizontalAlignment = isVisible ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+            btnConsoleNbErrors.Margin = isVisible ? new Thickness(13, 0, 0, 20) : new Thickness(13, 0, 15, 20);
+
             SetBrowsersHeight(!isVisible);
         }
 
@@ -419,6 +435,12 @@ namespace PoEW.Application {
         private void btnPriceWholeTab_Click(object sender, RoutedEventArgs e) {
             WindowController.Instance().PricingFormWin.SetPricingWholeTab(Session.Instance().GetSelectedTabIndex(), true);
             WindowController.Instance().PricingFormWin.ShowDialog();
+        }
+
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) {
+            if (txtSearch.Text != null && txtSearch.Text.Trim().Length > 0) {
+                var g = 0;
+            }
         }
     }
 }

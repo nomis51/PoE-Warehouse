@@ -210,6 +210,8 @@
             </Button.ContentTemplate>
         </Button>
 
+        <Button Name="btnConsoleNbErrors" Visibility="Hidden" Background="Red" Foreground="White" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="99" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="18" Height="18" Panel.ZIndex="13" Margin="13 0 0 20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="7" Style="{DynamicResource MahApps.Styles.Button.Circle}" BorderThickness="0" ToolTip="Errors"></Button>
+
         <Button Name="btnShowHideConsole" Click="btnShowHideConsole_Click" Background="Black" Panel.ZIndex="12" Margin="0 0 0 5" Width="25" Height="25" ToolTip="Show/Hide the log console" Grid.Column="2" Grid.Row="0" Grid.ColumnSpan="99" Grid.RowSpan="99" Style="{DynamicResource MahApps.Styles.Button.Circle}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
             <Button.ContentTemplate>
                 <DataTemplate>
@@ -238,6 +240,16 @@
             </Button.ContentTemplate>
         </Button>
 
-        <controls:ConsoleControl x:Name="console" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="4" Visibility="Hidden" Panel.ZIndex="11"></controls:ConsoleControl>
+        <controls:ConsoleControl x:Name="console" Grid.Row="3" Grid.Column="2"  Grid.ColumnSpan="4" Visibility="Hidden" Panel.ZIndex="11"></controls:ConsoleControl>
+
+        <DockPanel Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <iconPacks:PackIconFontAwesome Width="15"
+                                        Height="15"
+                                        Margin="0 2 3 0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Kind="SearchSolid" />
+            <TextBox Name="txtSearch" TextChanged="txtSearch_TextChanged" Text="TEST" MinWidth="150"></TextBox>
+        </DockPanel>
     </Grid>
 </mah:MetroWindow>

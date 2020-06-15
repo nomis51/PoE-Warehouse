@@ -7,6 +7,7 @@ It's a heavily featured trade and stash manager application for Path of Exile. G
 
 # Features
 - Virtual Stash
+- Multiple login methods : with the Session ID (POESESSID) (Like Acquisition and Procurement), in the browser on the Path of Exile website or with Steam (Steam method not implemented yet).
 - Auto-Online 
 - Automatically update forum thread while needed
 - Automatically fetch stash when needed
@@ -22,3 +23,9 @@ It's a heavily featured trade and stash manager application for Path of Exile. G
 - Multi-user support
 - Export items to PoB
 - Export items to imgur.com
+- Implement the Steam login method
+
+# For developpers
+The application is built in C# using WPF (.Net 4.5).
+It's using the Mahapps Metro library for the Metro UI.
+It's using CefSharp Chromimum based web browser component for the PoE Trade, PoE Ninja and web browser login method. (Require Visual C++ 2012)

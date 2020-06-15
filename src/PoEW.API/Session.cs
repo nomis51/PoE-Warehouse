@@ -121,10 +121,18 @@ namespace PoEW.Data {
 
         public void RunShopThreadUpdater() {
             Task.Run(async () => {
+                MessageController.Instance().Log("Shop Thread Updater started.");
                 while (true) {
-                    await UpdateShopThread(GetShop());
+                    var shop = GetShop();
+                    MessageController.Instance().Log($"Updating shop thread {shop.ThreadId} {shop.Title}...");
 
-                    Thread.Sleep(1 * 60 * 1000);
+                    if (await UpdateShopThread(shop)) {
+                        MessageController.Instance().Log($"Shop thread {shop.ThreadId} {shop.Title} updated.");
+                    } else {
+                        MessageController.Instance().Log($"[Warn][Session] Updating shop thread {shop.ThreadId} {shop.Title} failed.");
+                    }
+
+                    Thread.Sleep(5 * 60 * 1000);
                 }
             });
         }
@@ -243,11 +251,11 @@ namespace PoEW.Data {
 
         public bool AnyShops(int threadId) => ShopThreads.Keys.IndexOf(threadId) != -1;
 
-        public async Task UpdateShopThread(Shop shop) {
+        public async Task<bool> UpdateShopThread(Shop shop) {
             Lock_ShopThreadUpdate.WaitOne(1, true);
             if ((DateTime.Now - LastShopThreadUpdate).TotalSeconds <= maxShopThreadUpdateRateInSeconds) {
                 Lock_ShopThreadUpdate.ReleaseMutex();
-                return;
+                return false;
             }
 
             if (await _api.UpdateShopThread(CurrentThreadId, Player, shop.ToString())) {
@@ -255,9 +263,12 @@ namespace PoEW.Data {
                 MessageController.Instance().Log($"Shop thread {shop.ThreadId} {shop.Title} updated.");
             } else {
                 MessageController.Instance().Log($"[Warn][Session] Updating shop thread {shop.ThreadId} failed.");
+                Lock_ShopThreadUpdate.ReleaseMutex();
+                return false;
             }
 
             Lock_ShopThreadUpdate.ReleaseMutex();
+            return true;
         }
 
         public void SetCurrentThreadId(int threadId) {

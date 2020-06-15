@@ -38,7 +38,7 @@ namespace PoEW.Application.Views {
         public void Reset() {
             txtPrice.Text = "";
             cboCurrencies.SelectedValue = null;
-            cboTypes.SelectedValue = null;
+            cboTypes.SelectedValue = Shop.PriceTypeToPrefix[Data.Enums.PriceType.PRICE_TYPE_BUYOUT];
         }
 
         private void PricingForm_Loaded(object sender, RoutedEventArgs e) {
@@ -62,6 +62,7 @@ namespace PoEW.Application.Views {
         private void Init() {
             cboCurrencies.ItemsSource = Shop.CurrencyTypeToString.Values.ToList().FindAll(c => !string.IsNullOrEmpty(c));
             cboTypes.ItemsSource = Shop.PriceTypeToPrefix.Values.ToList().FindAll(c => !string.IsNullOrEmpty(c));
+            cboTypes.SelectedValue = Shop.PriceTypeToPrefix[Data.Enums.PriceType.PRICE_TYPE_BUYOUT];
 
             InitCurrencyImages();
         }
@@ -110,6 +111,18 @@ namespace PoEW.Application.Views {
         private void btnShowHidePrice_Click(object sender, RoutedEventArgs e) {
             IsPriceActive = !IsPriceActive;
             btnShowHidePrice.Content = IsPriceActive ? "Hide" : "Show";
+        }
+
+        private void imgAlc_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
+            cboCurrencies.SelectedIndex = cboCurrencies.Items.IndexOf(Shop.CurrencyTypeToString[Data.Enums.CurrencyType.CURRENCY_ORB_OF_ALCHEMY]);
+        }
+
+        private void imgChaos_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
+            cboCurrencies.SelectedIndex = cboCurrencies.Items.IndexOf(Shop.CurrencyTypeToString[Data.Enums.CurrencyType.CURRENCY_CHAOS_ORB]);
+        }
+
+        private void imgExalt_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
+            cboCurrencies.SelectedIndex = cboCurrencies.Items.IndexOf(Shop.CurrencyTypeToString[Data.Enums.CurrencyType.CURRENCY_EXALTED_ORB]);
         }
     }
 }

@@ -158,11 +158,10 @@ namespace PoEW.API {
             }
         }
 
-        public async Task RefreshOnlineStatus(Player player) {
+        public async Task<bool> RefreshOnlineStatus(Player player) {
             if (!string.IsNullOrEmpty(player.OnlineCode)) {
                 if (!await VerifyOnlineStatus(player.OnlineCode)) {
-                    await BecomeOnline(player.OnlineCode);
-                    return;
+                    return await BecomeOnline(player.OnlineCode);
                 }
 
                 var uri = new Uri(Url_OnlineControl);
@@ -173,9 +172,14 @@ namespace PoEW.API {
 
                     if (!response.IsSuccessStatusCode) {
                         MessageController.Instance().Log($"[Error][API] Error while refreshing online status: HTTP{response.StatusCode} {response.ReasonPhrase}");
+                        return false;
                     }
+
+                    return true;
                 }
             }
+
+            return false;
         }
 
 
@@ -218,7 +222,7 @@ namespace PoEW.API {
             }
         }
 
-        public async Task NotifyPoETrade(int threadId, string sessionId) {
+        public async Task<bool> NotifyPoETrade(int threadId, string sessionId) {
             if (Settings.Data().Get<bool>("Debug")) {
                 MessageController.Instance().Log("[Debug][API] Notifying poe.trade for thread indexing...");
             }
@@ -231,8 +235,11 @@ namespace PoEW.API {
 
                 try {
                     var response = await client.GetStringAsync(BaseUrlTemplate_VerifyPoETrade.Replace("$threadId$", threadId.ToString()));
+
+                    return true;
                 } catch (HttpRequestException e) {
                     MessageController.Instance().Log($"[Error][API] Error while notifying poe.trade for thread indexing: {e.Message}");
+                    return false;
                 }
             }
         }
@@ -241,6 +248,11 @@ namespace PoEW.API {
             List<League> leagues = new List<League>();
 
             string raw = await GetLeaguesPage();
+
+            if (raw == null) {
+                return null;
+            }
+
             var data = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(raw);
 
             foreach (var d in data) {
@@ -304,17 +316,17 @@ namespace PoEW.API {
             }
         }
 
-        public async Task UpdateShopThread(int threadId, Player player, string content) {
+        public async Task<bool> UpdateShopThread(int threadId, Player player, string content) {
             string editThreadPage = await GetEditThreadPage(threadId, player.SessionId);
 
             if (editThreadPage == null) {
-                return;
+                return false;
             }
 
             string csrfToken = Utils.GetCsrfToken(editThreadPage, "hash");
 
             if (string.IsNullOrEmpty(csrfToken)) {
-                return;
+                return false;
             }
 
             string title = Utils.FindTextBetween(editThreadPage, "<input type=\"text\" name=\"title\" id=\"title\" onkeypress=\"return&#x20;event.keyCode&#x21;&#x3D;13\" value=\"", "\">");
@@ -335,13 +347,17 @@ namespace PoEW.API {
                     var response = await client.PostAsync(baseUrl, new StringContent(data.Build(), Encoding.UTF8, "application/x-www-form-urlencoded"));
 
                     if (response.IsSuccessStatusCode) {
-                        await NotifyPoETrade(threadId, player.SessionId);
+                        if (await NotifyPoETrade(threadId, player.SessionId)) {
+                            return true;
+                        }
                     }
                 } catch (HttpRequestException e) {
                     MessageController.Instance().Log($"[Error][API] Error while updating shop thread {threadId}: {e.Message}");
-                    return;
+                    return false;
                 }
             }
+
+            return false;
         }
 
         public async Task<string> GetEditThreadPage(int threadId, string sessionId) {
@@ -357,15 +373,14 @@ namespace PoEW.API {
                 try {
                     return await client.GetStringAsync(BaseUrlTemplate_EditThread.Replace("$threadId$", threadId.ToString()));
                 } catch (HttpRequestException e) {
-                    MessageController.Instance().Log($"[Error][API]  retrieving edit-thread page for thread {threadId}: {e.Message}");
+                    MessageController.Instance().Log($"[Error][API] Error while retrieving edit-thread page for thread {threadId}: {e.Message}");
                     return null;
                 }
             }
         }
 
         public async Task<List<StashTab>> UpdateLocalStash(Player player, League league) {
-            var stashTabs = await GetStashTabs(league.Name, player);
-            return stashTabs;
+            return await GetStashTabs(league.Name, player);
         }
 
         public async Task<List<StashTab>> GetStashTabs(string league, Player player) {
@@ -400,13 +415,19 @@ namespace PoEW.API {
                     stashTabs.Find(t => t.Index == 0).Items = items;
                 } catch (HttpRequestException e) {
                     MessageController.Instance().Log($"[Error][API] Error while retrieving stash tabs for league {league}: {e.Message}");
-                    return new List<StashTab>();
+                    return null;
                 }
             }
 
             foreach (var tab in stashTabs) {
                 if (tab.Index > 0) {
-                    tab.Items = await GetItems(tab.Index, league, player);
+                    var items = await GetItems(tab.Index, league, player);
+
+                    if (items != null) {
+                        tab.Items = items;
+                    } else {
+                        MessageController.Instance().Log($"[Warn][API] Getting items for tab #{tab.Index} failed.");
+                    }
                 }
             }
 
@@ -441,7 +462,7 @@ namespace PoEW.API {
                     return items;
                 } catch (HttpRequestException e) {
                     MessageController.Instance().Log($"[Error][API] Error while retrieving items of tab #{tabIndex} of {league} league: {e.Message}");
-                    return new List<Item>();
+                    return null;
                 }
             }
         }
@@ -479,7 +500,7 @@ namespace PoEW.API {
                     return parsedData.Select(d => new Character(d)).ToList();
                 } catch (HttpRequestException e) {
                     MessageController.Instance().Log($"[Error][API] Error while retrieving characters: {e.Message}");
-                    return new List<Character>();
+                    return null;
                 }
             }
         }

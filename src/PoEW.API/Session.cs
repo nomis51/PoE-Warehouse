@@ -84,8 +84,11 @@ namespace PoEW.Data {
                 MessageController.Instance().Log("Auto online started.");
                 while (true) {
                     MessageController.Instance().Log("Refreshing online status...");
-                    await _api.RefreshOnlineStatus(Player);
-                    MessageController.Instance().Log("Online status refreshed.");
+                    if (await _api.RefreshOnlineStatus(Player)) {
+                        MessageController.Instance().Log("Online status refreshed.");
+                    } else {
+                        MessageController.Instance().Log("[Warn][Session] Refreshing online status failed.");
+                    }
 
                     // Every 4mins30s
                     Thread.Sleep((int)(4.5 * 60 * 1000));
@@ -99,11 +102,11 @@ namespace PoEW.Data {
                 while (true) {
                     int threadId = CurrentThreadId;
 
-                    await UpdateLocalStash(threadId);
-
-                    if (!IsLocalStashUpdaterPaused && GetShop(threadId).League.Name == GetShop(CurrentThreadId).League.Name) {
-                        MessageController.Instance().Log($"{GetShop(threadId).League.Name} local stash updated.");
-                        OnLocalStashTabsUpdated(ShopThreads[threadId].GetStashTabs());
+                    if (await UpdateLocalStash(threadId)) {
+                        if (!IsLocalStashUpdaterPaused && GetShop(threadId).League.Name == GetShop(CurrentThreadId).League.Name) {
+                            MessageController.Instance().Log($"{GetShop(threadId).League.Name} local stash updated.");
+                            OnLocalStashTabsUpdated(ShopThreads[threadId].GetStashTabs());
+                        }
                     }
 
                     Thread.Sleep(1 * 60 * 1000);
@@ -121,10 +124,16 @@ namespace PoEW.Data {
             });
         }
 
-        public async Task UpdateLocalStash(int threadId) {
+        public async Task<bool> UpdateLocalStash(int threadId) {
             MessageController.Instance().Log($"Updating {GetShop(threadId).League.Name} local stash...");
 
             var stashTabs = await _api.UpdateLocalStash(Player, ShopThreads[threadId].League);
+
+            if (stashTabs == null) {
+                MessageController.Instance().Log("[Warn][Session] Updating local stash failed.");
+                return false;
+            }
+
             stashTabs = stashTabs.OrderBy(t => t.Index).ToList();
 
             MessageController.Instance().Log($"{stashTabs.Count} {GetShop(threadId).League.Name} stash tab{(stashTabs.Count > 1 ? "s" : "")} received.");
@@ -148,6 +157,8 @@ namespace PoEW.Data {
             }
 
             ShopThreads[threadId].ApplyWholeTabPrices();
+
+            return true;
         }
 
         public async Task LoadLocalStash() {
@@ -181,7 +192,7 @@ namespace PoEW.Data {
 
             var wholeTabPrices = await _dataStore.Get<TabPrice>();
 
-            foreach(var tabPrice in wholeTabPrices) {
+            foreach (var tabPrice in wholeTabPrices) {
                 ShopThreads[tabPrice.ThreadId].SetWholeTabPrice(tabPrice.TabIndex, tabPrice.Price);
             }
 
@@ -221,21 +232,32 @@ namespace PoEW.Data {
                 return;
             }
 
-            await _api.UpdateShopThread(CurrentThreadId, Player, shop.ToString());
-            LastShopThreadUpdate = DateTime.Now;
-            MessageController.Instance().Log($"Shop thread {shop.ThreadId} {shop.Title} updated.");
+            if (await _api.UpdateShopThread(CurrentThreadId, Player, shop.ToString())) {
+
+                LastShopThreadUpdate = DateTime.Now;
+                MessageController.Instance().Log($"Shop thread {shop.ThreadId} {shop.Title} updated.");
+            } else {
+                MessageController.Instance().Log($"[Warn][Session] Updating shop thread {shop.ThreadId} failed.");
+            }
         }
 
         public void SetCurrentThreadId(int threadId) {
             CurrentThreadId = threadId;
         }
 
-        private async Task SetLeagues() {
+        private async Task<bool> SetLeagues() {
+            MessageController.Instance().Log("Retrieving leagues...");
             var leagues = await _api.GetLeagues();
+
+            if (leagues == null) {
+                return false;
+            }
 
             foreach (var l in leagues) {
                 Leagues.Add(l.Name, l);
             }
+
+            return true;
         }
 
         private async Task LoadPlayer() {
@@ -271,7 +293,11 @@ namespace PoEW.Data {
 
                     MessageController.Instance().Log($"{player.AccountName} authenticated.");
 
-                    await SetLeagues();
+                    if (!(await SetLeagues())) {
+                        MessageController.Instance().Log("[Warn][Session] Retrieving leagues failed.");
+                    }
+                } else {
+                    MessageController.Instance().Log("[Warn][Session] Authentication failed.");
                 }
             }
         }

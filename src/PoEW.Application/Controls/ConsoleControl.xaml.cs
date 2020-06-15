@@ -42,13 +42,17 @@ namespace PoEW.Application.Controls {
             item.Content = content;
 
             if (content.IndexOf("[Debug]") != -1) {
-                item.Foreground = Brushes.Orange;
+                item.Foreground = Brushes.Lime;
             }
 
             if (content.IndexOf("[Error]") != -1) {
                 ++nbErrors;
                 item.Foreground = Brushes.Red;
                 OnErrorLogFound(nbErrors);
+            }
+
+            if (content.IndexOf("[Warn]") != -1) {
+                item.Foreground = Brushes.Yellow;
             }
 
             return item;

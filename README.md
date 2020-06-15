@@ -20,4 +20,5 @@ It's a heavily featured trade and stash manager application. Greatly inspired by
 - Price checking and notifications if price might be wrong
 - Price a whole tab (can currently price items one-by-one)
 - Multi-user support
-- Automatic league selection on www.pathofexile.com/trade
+- Export items to PoB
+- Export items to imgur.com

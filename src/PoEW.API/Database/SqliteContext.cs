@@ -66,6 +66,9 @@ namespace PoEW.Data.Database {
             modelBuilder.Entity<ShopThread>()
                .Property(e => e.League)
                .HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<League>(v));
+            modelBuilder.Entity<TabPrice>()
+               .Property(e => e.Price)
+               .HasConversion(v => JsonConvert.SerializeObject(v), v => JsonConvert.DeserializeObject<Price>(v));
         }
 
         public DbSet<Character> Characters { get; set; }

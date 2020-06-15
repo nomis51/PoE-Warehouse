@@ -53,6 +53,7 @@ namespace PoEW.Data {
 
         public async Task<int> CreateShopThread(string league) {
             if (!string.IsNullOrEmpty(league)) {
+                MessageController.Instance().Log($"Generating new shop forum thread for {league} league...");
                 return await _api.GenerateShopThread(league, Player);
 
             }
@@ -82,7 +83,9 @@ namespace PoEW.Data {
             Task.Run(async () => {
                 MessageController.Instance().Log("Auto online started.");
                 while (true) {
+                    MessageController.Instance().Log("Refreshing online status...");
                     await _api.RefreshOnlineStatus(Player);
+                    MessageController.Instance().Log("Online status refreshed.");
 
                     // Every 4mins30s
                     Thread.Sleep((int)(4.5 * 60 * 1000));
@@ -143,6 +146,8 @@ namespace PoEW.Data {
 
                 ShopThreads[threadId].AddStashTab(tab);
             }
+
+            ShopThreads[threadId].ApplyWholeTabPrices();
         }
 
         public async Task LoadLocalStash() {
@@ -172,6 +177,12 @@ namespace PoEW.Data {
 
             foreach (var price in prices) {
                 ShopThreads[CurrentThreadId].SetPrice(price.ItemId, price.Value, true);
+            }
+
+            var wholeTabPrices = await _dataStore.Get<TabPrice>();
+
+            foreach(var tabPrice in wholeTabPrices) {
+                ShopThreads[tabPrice.ThreadId].SetWholeTabPrice(tabPrice.TabIndex, tabPrice.Price);
             }
 
             if (!IsLocalStashUpdaterStarted) {
@@ -212,6 +223,7 @@ namespace PoEW.Data {
 
             await _api.UpdateShopThread(CurrentThreadId, Player, shop.ToString());
             LastShopThreadUpdate = DateTime.Now;
+            MessageController.Instance().Log($"Shop thread {shop.ThreadId} {shop.Title} updated.");
         }
 
         public void SetCurrentThreadId(int threadId) {
@@ -227,10 +239,14 @@ namespace PoEW.Data {
         }
 
         private async Task LoadPlayer() {
+            MessageController.Instance().Log("Loading player data...");
             var players = (await _dataStore.Get<Player>());
 
             if (players != null && players.Count > 0) {
                 Player = players.Last();
+                MessageController.Instance().Log($"Player {Player.AccountName} loaded.");
+            } else {
+                MessageController.Instance().Log("No player data available.");
             }
         }
 
@@ -252,6 +268,8 @@ namespace PoEW.Data {
                     if (!(await _dataStore.Get<Player>(p => p.AccountName == Player.AccountName)).Any()) {
                         await _dataStore.Save(Player);
                     }
+
+                    MessageController.Instance().Log($"{player.AccountName} authenticated.");
 
                     await SetLeagues();
                 }
@@ -276,6 +294,8 @@ namespace PoEW.Data {
         }
 
         public async Task AddShop(int threadId, string leagueId, bool generateNewThread = false) {
+            MessageController.Instance().Log("Adding new shop...");
+
             if (!ShopThreads.ContainsKey(threadId)) {
                 if (generateNewThread) {
                     threadId = await CreateShopThread(leagueId);
@@ -290,6 +310,8 @@ namespace PoEW.Data {
                     League = Leagues[leagueId],
                     Title = title
                 });
+
+                MessageController.Instance().Log($"Shop {threadId} {title} of {leagueId} league created.");
             }
         }
 
@@ -313,12 +335,14 @@ namespace PoEW.Data {
             return null;
         }
 
-        public void SetWholeTabPrice(int tabIndex, Price price) {
+        public async void SetWholeTabPrice(int tabIndex, Price price) {
+            await _dataStore.Save(new TabPrice(CurrentThreadId, tabIndex, price));
             GetShop().SetWholeTabPrice(tabIndex, price);
             OnLocalStashTabsUpdated(GetShop().GetStashTabs());
         }
 
-        public void UnsetWholeTabPrice(int tabIndex) {
+        public async void UnsetWholeTabPrice(int tabIndex) {
+            await _dataStore.Delete<TabPrice>(GetShop().GetWholeTabPrice(tabIndex).Id);
             GetShop().UnsetWholeTabPrice(tabIndex);
             OnLocalStashTabsUpdated(GetShop().GetStashTabs());
         }

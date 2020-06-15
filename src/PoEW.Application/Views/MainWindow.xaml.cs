@@ -80,7 +80,7 @@ namespace PoEW.Application {
 
         private void SetupEvents() {
             WindowController.Instance().LoginWin.Closed += LoginWin_Closed;
-            WindowController.Instance().ShopFormWin.IsVisibleChanged += ShopFormWin_IsVisibleChanged; ;
+            WindowController.Instance().ShopFormWin.IsVisibleChanged += ShopFormWin_IsVisibleChanged;
             stashTabSelectorControl.OnStashTabSelected += StashTabSelectorControl_OnStashTabSelected;
             Session.OnLocalStashTabsUpdated += Session_OnLocalStashTabsUpdated;
             webBrowser_PoENinja_Builds.FrameLoadEnd += WebBrowser_FrameLoadEnd;
@@ -414,6 +414,11 @@ namespace PoEW.Application {
 
         private void btnAccount_Click(object sender, RoutedEventArgs e) {
             System.Diagnostics.Process.Start(Url_PlayerAccount);
+        }
+
+        private void btnPriceWholeTab_Click(object sender, RoutedEventArgs e) {
+            WindowController.Instance().PricingFormWin.SetPricingWholeTab(Session.Instance().GetSelectedTabIndex(), true);
+            WindowController.Instance().PricingFormWin.ShowDialog();
         }
     }
 }

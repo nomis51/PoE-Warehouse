@@ -133,7 +133,8 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="50"></ColumnDefinition>
             <ColumnDefinition Width="10"></ColumnDefinition>
-            <ColumnDefinition Width="424"></ColumnDefinition>
+            <ColumnDefinition Width="399"></ColumnDefinition>
+            <ColumnDefinition Width="25"></ColumnDefinition>
             <ColumnDefinition Width="10"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
@@ -184,17 +185,17 @@
         </mah:HamburgerMenu>
 
         <controls:StashTabSelectorControl x:Name="stashTabSelectorControl" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" ></controls:StashTabSelectorControl>
-        <controls:StashTabControl Margin="1" x:Name="stashTabControl" Grid.Row="1" Grid.Column="2"></controls:StashTabControl>
+        <controls:StashTabControl Margin="1" x:Name="stashTabControl" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"></controls:StashTabControl>
 
-        <wpf:ChromiumWebBrowser x:Name="webBrowser_PoETrade" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://www.pathofexile.com/trade"/>
-        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_ChallengeCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/currency"/>
-        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_StandardCurrency" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/standard/currency"/>
-        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_Builds" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Address="https://poe.ninja/challenge/builds"/>
-        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" />
+        <wpf:ChromiumWebBrowser x:Name="webBrowser_PoETrade" Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" Address="https://www.pathofexile.com/trade"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_ChallengeCurrency" Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" Address="https://poe.ninja/challenge/currency"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_StandardCurrency" Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" Address="https://poe.ninja/standard/currency"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser_PoENinja_Builds" Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" Address="https://poe.ninja/challenge/builds"/>
+        <wpf:ChromiumWebBrowser Visibility="Hidden" x:Name="webBrowser" Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" />
 
-        <mah:ProgressRing Name="loaderWebBrowser" Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="False"></mah:ProgressRing>
+        <mah:ProgressRing Name="loaderWebBrowser" Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="False"></mah:ProgressRing>
 
-        <mah:ProgressRing Name="loaderStash" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True"></mah:ProgressRing>
+        <mah:ProgressRing Name="loaderStash" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True"></mah:ProgressRing>
 
         <Button Name="btnAddShop" Click="btnAddShop_Click" Background="Black" Panel.ZIndex="10" Margin="5 0 0 5" Width="35" Height="35" ToolTip="Add a new shop" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="99" Grid.RowSpan="99" Style="{DynamicResource MahApps.Styles.Button.Circle}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
             <Button.ContentTemplate>
@@ -222,6 +223,21 @@
             </Button.ContentTemplate>
         </Button>
 
-        <controls:ConsoleControl x:Name="console" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" Visibility="Hidden" Panel.ZIndex="11"></controls:ConsoleControl>
+        <Button Name="btnPriceWholeTab" Click="btnPriceWholeTab_Click"  Background="Black" Margin="0 5 5 0" Width="25" Height="25" ToolTip="Price the whole tab" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="0" Style="{DynamicResource MahApps.Styles.Button.Circle}" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconModern Width="15"
+                                        Height="15"
+                                        Margin="0 0 1 0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Kind="Money" />
+                    </StackPanel>
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
+
+        <controls:ConsoleControl x:Name="console" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="4" Visibility="Hidden" Panel.ZIndex="11"></controls:ConsoleControl>
     </Grid>
 </mah:MetroWindow>

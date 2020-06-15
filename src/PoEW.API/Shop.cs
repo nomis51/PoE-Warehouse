@@ -266,7 +266,19 @@ namespace PoEW.Data {
             PriceToItems.Clear();
         }
 
-        public void SetPrice(string itemId, Price price, bool isActive) {
+        public void SetWholeTabPrice(int tabIndex, Price price) {
+            for (int i = 0; i < StashTabs[tabIndex].Items.Count; ++i) {
+                SetPrice(StashTabs[tabIndex].Items[i].Id, price, true, (i + 1) == StashTabs[tabIndex].Items.Count);
+            }
+        }
+
+        public void UnsetWholeTabPrice(int tabIndex) {
+            foreach (var item in StashTabs[tabIndex].Items) {
+                UnsetPrice(item.Id);
+            }
+        }
+
+        public void SetPrice(string itemId, Price price, bool isActive, bool updateShopThread = true) {
             Price oldPrice = null;
             if (ItemIdToPrice.ContainsKey(itemId)) {
                 oldPrice = ItemIdToPrice[itemId];
@@ -302,7 +314,9 @@ namespace PoEW.Data {
                 IgnoredItems.RemoveAt(index);
             }
 
-            OnRequestShopThreadUpdate(this);
+            if (updateShopThread) {
+                OnRequestShopThreadUpdate(this);
+            }
         }
 
         public void UnsetPrice(string itemId) {

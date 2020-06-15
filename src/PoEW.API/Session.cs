@@ -28,7 +28,7 @@ namespace PoEW.Data {
         private Dictionary<string, List<StashTab>> StashTabs = new Dictionary<string, List<StashTab>>();
         public Player Player { get; private set; }
         public int CurrentThreadId { get; private set; }
-        private int SelectedTab = 0;
+        public int SelectedTab { get; private set; } = 0;
         private Dictionary<string, League> Leagues = new Dictionary<string, League>();
 
         private readonly PoEAPI _api = new PoEAPI();
@@ -313,5 +313,14 @@ namespace PoEW.Data {
             return null;
         }
 
+        public void SetWholeTabPrice(int tabIndex, Price price) {
+            GetShop().SetWholeTabPrice(tabIndex, price);
+            OnLocalStashTabsUpdated(GetShop().GetStashTabs());
+        }
+
+        public void UnsetWholeTabPrice(int tabIndex) {
+            GetShop().UnsetWholeTabPrice(tabIndex);
+            OnLocalStashTabsUpdated(GetShop().GetStashTabs());
+        }
     }
 }

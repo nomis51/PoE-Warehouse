@@ -1,5 +1,5 @@
 # PoE-Warehouse
-It's a heavily featured trade and stash manager application. Greatly inspired by the [Acquisistion](https://github.com/xyzz/acquisition) project, but with a much more intuitive interface and many additional features.
+It's a heavily featured trade and stash manager application for Path of Exile. Greatly inspired by the [Acquisistion](https://github.com/xyzz/acquisition) project, but with a much more intuitive interface and many additional features.
 
 ## Requirements
 - .NET Framework 4.5

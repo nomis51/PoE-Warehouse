@@ -15,11 +15,11 @@ It's a heavily featured trade and stash manager application for Path of Exile. G
 - Integrate poe.ninja Currency and Builds with automatic league selection
 - Integrate www.pathofexile.com/trade with automatic league selection and auto-login
 - Show/Hide items on trading websites on demand
+- Price a whole stash tab, with automatic pricing for the new items you put in
 
 ## TODO
 - Price expiration date and notification when it expires
 - Price checking and notifications if price might be wrong
-- Price a whole tab (can currently price items one-by-one)
 - Multi-user support
 - Export items to PoB
 - Export items to imgur.com

@@ -13,7 +13,7 @@ namespace PoEW.Data.Abstractions {
         Task<List<T>> Insert<T>(List<T> entities) where T : Model;
         Task<T> Update<T>(T entity, string[] includes = null) where T : Model;
         Task<T> Delete<T>(string id) where T : Model;
-        Task<List<T>> DeleteAll<T>() where T : Model;
+        Task<List<T>> DeleteAll<T>(Predicate<T> predicate) where T : Model;
         Task<T> Save<T>(T entity, string[] includes = null) where T : Model;
         Task<List<T>> Save<T>(List<T> entities, string[] includes = null) where T : Model;
     }

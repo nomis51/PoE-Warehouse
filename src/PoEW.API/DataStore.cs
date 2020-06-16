@@ -107,8 +107,8 @@ namespace PoEW.Data {
             return entities;
         }
 
-        public async Task<List<T>> DeleteAll<T>() where T : Model {
-            var entities = await Get<T>();
+        public async Task<List<T>> DeleteAll<T>(Predicate<T> predicate) where T : Model {
+            var entities = await Get<T>(predicate);
 
             foreach (var e in entities) {
                 await Delete<T>(e.Id);

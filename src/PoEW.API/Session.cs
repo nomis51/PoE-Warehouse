@@ -68,7 +68,7 @@ namespace PoEW.Data {
         }
 
         private async void Shop_OnRequestShopThreadUpdate(Shop shop) {
-            await _dataStore.DeleteAll<API.Models.Price>();
+            await _dataStore.DeleteAll<API.Models.Price>(p => true);
 
             await _dataStore.Save(shop.GetPrices().Select(v => new API.Models.Price() {
                 Value = v.Value,
@@ -414,6 +414,25 @@ namespace PoEW.Data {
             await _dataStore.Delete<TabPrice>(GetShop().GetWholeTabPrice(tabIndex).Id);
             GetShop().UnsetWholeTabPrice(tabIndex);
             OnLocalStashTabsUpdated(GetShop().GetStashTabs());
+        }
+
+        public async Task DeleteShop(int threadId) {
+            var shops = await _dataStore.Get<ShopThread>(s => s.ThreadId == threadId);
+
+            if (shops == null || shops.Count != 1) {
+                return;
+            }
+
+            string id = shops[0].Id;
+
+            await _dataStore.Delete<ShopThread>(id);
+            await _dataStore.DeleteAll<API.Models.Price>(p => p.ThreadId == threadId);
+            await _dataStore.DeleteAll<TabPrice>(t => t.ThreadId == threadId);
+
+            ShopThreads.Remove(threadId);
+
+            var firstShop = GetFirstShop();
+            CurrentThreadId = firstShop != null ? firstShop.ThreadId : -1;
         }
     }
 }

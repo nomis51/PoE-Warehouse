@@ -31,6 +31,7 @@ using CefSharp.Wpf;
 using CefSharp;
 using PoEW.API.Logging;
 using System.Security.Policy;
+using MessageBox = System.Windows.MessageBox;
 
 namespace PoEW.Application {
     /// <summary>
@@ -103,7 +104,7 @@ namespace PoEW.Application {
 
         private void ShowConsoleErrorNotification(int nbErrors) {
             btnConsoleNbErrors.Content = nbErrors.ToString();
-            btnConsoleNbErrors.ToolTip = $"There {(nbErrors > 1 ? "are" : "is")} {nbErrors} error{(nbErrors > 1 ? "s" :"")}! Open the console to see {(nbErrors > 1 ? "it" : "them")}.";
+            btnConsoleNbErrors.ToolTip = $"There {(nbErrors > 1 ? "are" : "is")} {nbErrors} error{(nbErrors > 1 ? "s" : "")}! Open the console to see {(nbErrors > 1 ? "it" : "them")}.";
             btnConsoleNbErrors.Visibility = Visibility.Visible;
         }
 
@@ -240,7 +241,7 @@ namespace PoEW.Application {
 
             if (!Session.Instance().GetShop().GetStashTabs().Any()) {
                 stashTabControl.ClearStashTab();
-                await Session.Instance().UpdateLocalStash(threadId);
+                Session.Instance().UpdateLocalStash(threadId);
             }
 
             foreach (var tab in Session.Instance().GetShop().GetStashTabsName()) {
@@ -440,6 +441,22 @@ namespace PoEW.Application {
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e) {
             if (txtSearch.Text != null && txtSearch.Text.Trim().Length > 0) {
                 var g = 0;
+            }
+        }
+
+        private async void menItDeleteShop_Click(object sender, RoutedEventArgs e) {
+            var shop = Session.Instance().GetShop();
+            if (MessageBox.Show($"Are you sure you want to PERMANENTLY delete the shop {shop.ThreadId} {shop.Title} of {shop.League.Name} league? (The forum shop thread won't be deleted)", $"Shop {shop.ThreadId} {shop.Title} of {shop.League.Name} league", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                await Session.Instance().DeleteShop(shop.ThreadId);
+
+                var newShop = Session.Instance().GetShop();
+
+                if(newShop != null) {
+                    txtbLeague.Text = newShop.League.Name;
+                    txtbThreadId.Text = newShop.ThreadId.ToString();
+
+                    SetHamMenuItemsFromShops();
+                }
             }
         }
     }

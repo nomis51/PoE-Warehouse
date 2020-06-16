@@ -59,6 +59,17 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator Margin="0 2 0 2 "/>
+
+                            <MenuItem Name="menItDeleteShop" ToolTip="Delete the current shop" Header="Delete the current shop" FontSize="12" Click="menItDeleteShop_Click">
+                                <MenuItem.Icon>
+                                    <iconPacks:PackIconFontAwesome Width="20"
+                                        Height="10"
+                                        VerticalAlignment="Center"
+                                        Kind="TrashSolid" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+
+                            <Separator Margin="0 2 0 2 "/>
                             <MenuItem Name="menItQuit" ToolTip="Quit PoE Warehouse" Header="Quit" FontSize="12" Click="menItQuit_Click">
                                 <MenuItem.Icon>
                                     <iconPacks:PackIconModern Width="20"
